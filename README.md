@@ -2,6 +2,9 @@
 
 An Android app to track and monitor your Gumroad payouts directly from your device.
 
+![gumroad](https://github.com/user-attachments/assets/c2d7f4df-dfae-4a3d-b656-1b50359bc976)
+
+
 ## Features
 
 - View all your Gumroad payouts in a clean, modern interface
