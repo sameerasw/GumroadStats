@@ -23,6 +23,7 @@ import com.sameerasw.gumroadstats.utils.formatDate
 fun CompactPayoutCard(
     payout: Payout,
     onClick: () -> Unit,
+    modifier: Modifier = Modifier,
     isFirst: Boolean = false,
     isLast: Boolean = false
 ) {
@@ -44,7 +45,7 @@ fun CompactPayoutCard(
     }
 
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
         elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
@@ -77,4 +78,3 @@ fun CompactPayoutCard(
         }
     }
 }
-

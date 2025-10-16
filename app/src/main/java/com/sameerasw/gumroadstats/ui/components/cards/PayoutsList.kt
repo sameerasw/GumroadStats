@@ -66,8 +66,6 @@ fun PayoutsList(
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(
-                start = 16.dp,
-                end = 16.dp,
                 top = 8.dp,
                 bottom = 16.dp
             ),
@@ -120,7 +118,7 @@ fun PayoutsList(
                     Text(
                         text = "History",
                         style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.padding(start = 4.dp, top = 16.dp, bottom = 8.dp)
+                        modifier = Modifier.padding(start = 20.dp, top = 16.dp, bottom = 8.dp)
                     )
                 }
 
@@ -134,6 +132,7 @@ fun PayoutsList(
                     CompactPayoutCard(
                         payout = payout,
                         onClick = { onPayoutClick(payout) },
+                        modifier = Modifier.padding(horizontal = 16.dp),
                         isFirst = isFirst,
                         isLast = isLast
                     )
