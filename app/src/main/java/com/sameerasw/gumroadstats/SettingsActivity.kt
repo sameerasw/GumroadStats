@@ -1,6 +1,5 @@
 package com.sameerasw.gumroadstats
 
-import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -10,15 +9,20 @@ import androidx.activity.SystemBarStyle
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.sameerasw.gumroadstats.ui.screens.PayoutsScreen
+import com.sameerasw.gumroadstats.ui.screens.SettingsScreen
 import com.sameerasw.gumroadstats.ui.theme.GumroadStatsTheme
 import com.sameerasw.gumroadstats.viewmodel.PayoutsViewModel
 
-class MainActivity : ComponentActivity() {
+/**
+ * Separate activity for Settings screen with proper back navigation
+ */
+class SettingsActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -54,14 +58,17 @@ class MainActivity : ComponentActivity() {
                         }
                     )
 
-                    PayoutsScreen(
-                        viewModel = viewModel,
-                        onNavigateToSettings = {
-                            startActivity(Intent(this@MainActivity, SettingsActivity::class.java))
-                        }
+                    val updateInterval by viewModel.updateInterval.collectAsState()
+
+                    SettingsScreen(
+                        currentInterval = updateInterval,
+                        onIntervalChange = { viewModel.setUpdateInterval(it) },
+                        onClearToken = { viewModel.clearAccessToken() },
+                        onNavigateBack = { finish() }
                     )
                 }
             }
         }
     }
 }
+
