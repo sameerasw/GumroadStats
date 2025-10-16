@@ -1,5 +1,6 @@
 package com.sameerasw.gumroadstats.ui.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -9,6 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -20,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import com.sameerasw.gumroadstats.data.model.Payout
 import com.sameerasw.gumroadstats.viewmodel.PayoutsUiState
 import com.sameerasw.gumroadstats.viewmodel.PayoutsViewModel
+import com.sameerasw.gumroadstats.viewmodel.PayoutDetailsState
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -32,8 +35,17 @@ fun PayoutsScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val accessToken by viewModel.accessToken.collectAsState()
+    val payoutDetailsState by viewModel.payoutDetailsState.collectAsState()
     var tokenInput by remember { mutableStateOf("") }
     val keyboardController = LocalSoftwareKeyboardController.current
+    val sheetState = rememberModalBottomSheetState()
+    var showBottomSheet by remember { mutableStateOf(false) }
+
+    // Show bottom sheet when details are loaded
+    LaunchedEffect(payoutDetailsState) {
+        showBottomSheet = payoutDetailsState is PayoutDetailsState.Success ||
+                         payoutDetailsState is PayoutDetailsState.Loading
+    }
 
     Scaffold(
         topBar = {
@@ -165,7 +177,10 @@ fun PayoutsScreen(
                     is PayoutsUiState.Success -> {
                         PayoutsList(
                             payouts = state.payouts,
-                            isOfflineData = state.isOfflineData
+                            isOfflineData = state.isOfflineData,
+                            onPayoutClick = { payout ->
+                                payout.id?.let { viewModel.loadPayoutDetails(it) }
+                            }
                         )
                     }
                     is PayoutsUiState.Error -> {
@@ -187,13 +202,33 @@ fun PayoutsScreen(
                 }
             }
         }
+
+        // Bottom Sheet for Payout Details
+        if (showBottomSheet) {
+            ModalBottomSheet(
+                onDismissRequest = {
+                    showBottomSheet = false
+                    viewModel.clearPayoutDetails()
+                },
+                sheetState = sheetState
+            ) {
+                PayoutDetailsSheet(
+                    detailsState = payoutDetailsState,
+                    onDismiss = {
+                        showBottomSheet = false
+                        viewModel.clearPayoutDetails()
+                    }
+                )
+            }
+        }
     }
 }
 
 @Composable
 fun PayoutsList(
     payouts: List<Payout>,
-    isOfflineData: Boolean = false
+    isOfflineData: Boolean = false,
+    onPayoutClick: (Payout) -> Unit
 ) {
     if (payouts.isEmpty()) {
         Box(
@@ -211,7 +246,7 @@ fun PayoutsList(
                 top = 8.dp,
                 bottom = 16.dp
             ),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             if (isOfflineData) {
                 item {
@@ -243,57 +278,193 @@ fun PayoutsList(
             }
 
             items(payouts) { payout ->
-                PayoutCard(payout = payout)
+                CompactPayoutCard(
+                    payout = payout,
+                    onClick = { onPayoutClick(payout) }
+                )
             }
         }
     }
 }
 
 @Composable
-fun PayoutCard(payout: Payout) {
+fun CompactPayoutCard(
+    payout: Payout,
+    onClick: () -> Unit
+) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
-        Column(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+            Column(
+                modifier = Modifier.weight(1f)
             ) {
                 Text(
                     text = "${payout.amount} ${payout.currency}",
-                    style = MaterialTheme.typography.headlineSmall,
+                    style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.primary
                 )
-                StatusChip(status = payout.status)
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = formatDate(payout.createdAt),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            StatusChip(status = payout.status)
+        }
+    }
+}
 
-            PayoutInfoRow(label = "Payment Processor", value = payout.paymentProcessor.uppercase())
-            PayoutInfoRow(label = "Created", value = formatDate(payout.createdAt))
-
-            if (payout.processedAt != null) {
-                PayoutInfoRow(label = "Processed", value = formatDate(payout.processedAt))
-            }
-
-            if (payout.bankAccountVisual != null) {
-                PayoutInfoRow(label = "Bank Account", value = payout.bankAccountVisual)
-            }
-
-            if (payout.paypalEmail != null) {
-                PayoutInfoRow(label = "PayPal Email", value = payout.paypalEmail)
-            }
-
-            if (payout.id != null) {
-                PayoutInfoRow(label = "ID", value = payout.id)
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun PayoutDetailsSheet(
+    detailsState: PayoutDetailsState,
+    onDismiss: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 32.dp)
+    ) {
+        // Header
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp, vertical = 16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Payout Details",
+                style = MaterialTheme.typography.headlineSmall
+            )
+            IconButton(onClick = onDismiss) {
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = "Close"
+                )
             }
         }
+
+        Divider()
+
+        when (detailsState) {
+            is PayoutDetailsState.Loading -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(64.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
+            is PayoutDetailsState.Success -> {
+                PayoutDetailsContent(payout = detailsState.payout)
+            }
+            is PayoutDetailsState.Error -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(32.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Error: ${detailsState.message}",
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+            else -> {}
+        }
+    }
+}
+
+@Composable
+fun PayoutDetailsContent(payout: Payout) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(24.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        // Amount and Status
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column {
+                Text(
+                    text = "Amount",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    text = "${payout.amount} ${payout.currency}",
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+            StatusChip(status = payout.status)
+        }
+
+        Divider()
+
+        // Payment Details
+        DetailRow(label = "Payment Processor", value = payout.paymentProcessor.uppercase())
+
+        if (payout.bankAccountVisual != null) {
+            DetailRow(label = "Bank Account", value = payout.bankAccountVisual)
+        }
+
+        if (payout.paypalEmail != null) {
+            DetailRow(label = "PayPal Email", value = payout.paypalEmail)
+        }
+
+        Divider()
+
+        // Dates
+        DetailRow(label = "Created", value = formatDate(payout.createdAt))
+
+        if (payout.processedAt != null) {
+            DetailRow(label = "Processed", value = formatDate(payout.processedAt))
+        }
+
+        if (payout.id != null) {
+            Divider()
+            DetailRow(label = "Payout ID", value = payout.id)
+        }
+    }
+}
+
+@Composable
+fun DetailRow(label: String, value: String) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Text(
+            text = value,
+            style = MaterialTheme.typography.bodyLarge
+        )
     }
 }
 
@@ -317,27 +488,6 @@ fun StatusChip(status: String) {
             color = color,
             style = MaterialTheme.typography.labelMedium,
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-        )
-    }
-}
-
-@Composable
-fun PayoutInfoRow(label: String, value: String) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 2.dp)
-    ) {
-        Text(
-            text = "$label: ",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.weight(0.4f)
-        )
-        Text(
-            text = value,
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.weight(0.6f)
         )
     }
 }

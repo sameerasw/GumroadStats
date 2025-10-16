@@ -23,6 +23,13 @@ sealed class PayoutsUiState {
     data class Error(val message: String) : PayoutsUiState()
 }
 
+sealed class PayoutDetailsState {
+    object Idle : PayoutDetailsState()
+    object Loading : PayoutDetailsState()
+    data class Success(val payout: Payout) : PayoutDetailsState()
+    data class Error(val message: String) : PayoutDetailsState()
+}
+
 class PayoutsViewModel(context: Context) : ViewModel() {
     private val repository = GumroadRepository()
     private val preferencesManager = PreferencesManager(context)
@@ -30,6 +37,9 @@ class PayoutsViewModel(context: Context) : ViewModel() {
 
     private val _uiState = MutableStateFlow<PayoutsUiState>(PayoutsUiState.Initial)
     val uiState: StateFlow<PayoutsUiState> = _uiState.asStateFlow()
+
+    private val _payoutDetailsState = MutableStateFlow<PayoutDetailsState>(PayoutDetailsState.Idle)
+    val payoutDetailsState: StateFlow<PayoutDetailsState> = _payoutDetailsState.asStateFlow()
 
     private val _accessToken = MutableStateFlow("")
     val accessToken: StateFlow<String> = _accessToken.asStateFlow()
@@ -127,6 +137,25 @@ class PayoutsViewModel(context: Context) : ViewModel() {
                 }
             )
         }
+    }
+
+    fun loadPayoutDetails(payoutId: String) {
+        viewModelScope.launch {
+            _payoutDetailsState.value = PayoutDetailsState.Loading
+            val result = repository.getPayoutDetails(payoutId, _accessToken.value)
+            result.fold(
+                onSuccess = { payout ->
+                    _payoutDetailsState.value = PayoutDetailsState.Success(payout)
+                },
+                onFailure = { error ->
+                    _payoutDetailsState.value = PayoutDetailsState.Error(error.message ?: "Failed to load details")
+                }
+            )
+        }
+    }
+
+    fun clearPayoutDetails() {
+        _payoutDetailsState.value = PayoutDetailsState.Idle
     }
 
     override fun onCleared() {

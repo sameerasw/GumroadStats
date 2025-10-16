@@ -11,6 +11,11 @@ data class PayoutsResponse(
     val nextPageKey: String?
 )
 
+data class PayoutDetailsResponse(
+    val success: Boolean,
+    val payout: Payout
+)
+
 data class Payout(
     val id: String?,
     val amount: String,

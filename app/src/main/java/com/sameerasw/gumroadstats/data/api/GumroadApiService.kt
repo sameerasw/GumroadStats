@@ -1,7 +1,9 @@
 package com.sameerasw.gumroadstats.data.api
 
+import com.sameerasw.gumroadstats.data.model.PayoutDetailsResponse
 import com.sameerasw.gumroadstats.data.model.PayoutsResponse
 import retrofit2.http.GET
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface GumroadApiService {
@@ -13,5 +15,10 @@ interface GumroadApiService {
         @Query("page_key") pageKey: String? = null,
         @Query("include_upcoming") includeUpcoming: String? = "true"
     ): PayoutsResponse
-}
 
+    @GET("v2/payouts/{id}")
+    suspend fun getPayoutDetails(
+        @Path("id") payoutId: String,
+        @Query("access_token") accessToken: String
+    ): PayoutDetailsResponse
+}

@@ -1,6 +1,7 @@
 package com.sameerasw.gumroadstats.data.repository
 
 import com.sameerasw.gumroadstats.data.api.RetrofitClient
+import com.sameerasw.gumroadstats.data.model.Payout
 import com.sameerasw.gumroadstats.data.model.PayoutsResponse
 
 class GumroadRepository {
@@ -20,5 +21,16 @@ class GumroadRepository {
             Result.failure(e)
         }
     }
-}
 
+    suspend fun getPayoutDetails(
+        payoutId: String,
+        accessToken: String
+    ): Result<Payout> {
+        return try {
+            val response = apiService.getPayoutDetails(payoutId, accessToken)
+            Result.success(response.payout)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+}
