@@ -51,6 +51,9 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
 
+    // DataStore for preferences
+    implementation(libs.androidx.datastore.preferences)
+
     // Networking
     implementation(libs.retrofit)
     implementation(libs.retrofit.gson)
