@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Gumroad Stats</string>
+    <string name="widget_description">View your Gumroad payouts at a glance</string>
 </resources>

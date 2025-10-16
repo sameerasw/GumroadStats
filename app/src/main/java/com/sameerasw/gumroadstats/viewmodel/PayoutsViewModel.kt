@@ -8,6 +8,7 @@ import com.sameerasw.gumroadstats.data.model.Payout
 import com.sameerasw.gumroadstats.data.preferences.PreferencesManager
 import com.sameerasw.gumroadstats.data.preferences.UpdateInterval
 import com.sameerasw.gumroadstats.data.repository.GumroadRepository
+import com.sameerasw.gumroadstats.widget.WidgetUpdateHelper
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,7 +31,7 @@ sealed class PayoutDetailsState {
     data class Error(val message: String) : PayoutDetailsState()
 }
 
-class PayoutsViewModel(context: Context) : ViewModel() {
+class PayoutsViewModel(private val context: Context) : ViewModel() {
     private val repository = GumroadRepository()
     private val preferencesManager = PreferencesManager(context)
     private val payoutsCache = PayoutsCache(context)
@@ -125,6 +126,9 @@ class PayoutsViewModel(context: Context) : ViewModel() {
                     // Save to cache
                     payoutsCache.savePayouts(response.payouts)
                     _uiState.value = PayoutsUiState.Success(response.payouts, isOfflineData = false)
+
+                    // Update widgets when data changes
+                    WidgetUpdateHelper.updateAllWidgets(context)
                 },
                 onFailure = { error ->
                     // If we have cached data, show it with offline indicator

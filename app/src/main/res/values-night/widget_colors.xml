@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Widget colors - Dark mode with Material You support -->
+    <color name="widget_card_background">@android:color/system_neutral1_900</color>
+    <color name="widget_featured_card_background">@android:color/system_accent1_700</color>
+    <color name="widget_status_background">@android:color/system_accent3_800</color>
+    <color name="widget_featured_status_background">@android:color/system_accent2_800</color>
+    <color name="widget_background">@android:color/system_neutral1_800</color>
+</resources>
+
