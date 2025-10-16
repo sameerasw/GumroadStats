@@ -147,6 +147,10 @@ class PayoutsRemoteViewsFactory(
         // Color the status icon
         views.setInt(R.id.payout_status_icon, "setColorFilter", colors.statusTextColor)
 
+        // Set fill-in intent for clicking on this item
+        val fillInIntent = Intent()
+        views.setOnClickFillInIntent(R.id.payout_card, fillInIntent)
+
         return views
     }
 

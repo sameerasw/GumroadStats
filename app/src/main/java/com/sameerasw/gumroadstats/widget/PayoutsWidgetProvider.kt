@@ -1,10 +1,12 @@
 package com.sameerasw.gumroadstats.widget
 
+import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.content.Intent
 import android.widget.RemoteViews
+import com.sameerasw.gumroadstats.MainActivity
 import com.sameerasw.gumroadstats.R
 
 /**
@@ -55,12 +57,26 @@ class PayoutsWidgetProvider : AppWidgetProvider() {
             val colors = WidgetColorHelper.getColors(context, isFeatured = false)
             views.setTextColor(R.id.widget_empty_view, colors.secondaryTextColor)
 
+            // Create intent to open MainActivity when widget is clicked
+            val intent = Intent(context, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            }
+            val pendingIntent = PendingIntent.getActivity(
+                context,
+                0,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+
+            // Set pending intent template for list items
+            views.setPendingIntentTemplate(R.id.widget_payouts_list, pendingIntent)
+
             // Set up the intent that starts the PayoutsRemoteViewsService
-            val intent = Intent(context, PayoutsRemoteViewsService::class.java)
-            intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
+            val serviceIntent = Intent(context, PayoutsRemoteViewsService::class.java)
+            serviceIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
 
             // Set the adapter for the list view
-            views.setRemoteAdapter(R.id.widget_payouts_list, intent)
+            views.setRemoteAdapter(R.id.widget_payouts_list, serviceIntent)
 
             // Set empty view
             views.setEmptyView(R.id.widget_payouts_list, R.id.widget_empty_view)
