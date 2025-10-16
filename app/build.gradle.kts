@@ -52,6 +52,9 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation("androidx.compose.material:material-icons-extended")
 
+    // Splash Screen
+    implementation("androidx.core:core-splashscreen:1.0.1")
+
     // DataStore for preferences
     implementation(libs.androidx.datastore.preferences)
 

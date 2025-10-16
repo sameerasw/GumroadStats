@@ -14,12 +14,16 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.sameerasw.gumroadstats.ui.screens.PayoutsScreen
 import com.sameerasw.gumroadstats.ui.theme.GumroadStatsTheme
 import com.sameerasw.gumroadstats.viewmodel.PayoutsViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Install splash screen before super.onCreate()
+        installSplashScreen()
+
         super.onCreate(savedInstanceState)
 
         // Enable full edge-to-edge drawing for both status and navigation bars
