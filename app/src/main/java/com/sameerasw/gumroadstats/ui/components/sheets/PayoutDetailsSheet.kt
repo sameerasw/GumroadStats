@@ -63,10 +63,20 @@ fun PayoutDetailsSheet(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(64.dp),
+                        .height(300.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator()
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        CircularProgressIndicator()
+                        Text(
+                            text = "Loading payout details...",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
             }
             is PayoutDetailsState.Success -> {
@@ -148,4 +158,3 @@ private fun PayoutDetailsContent(payout: Payout) {
         }
     }
 }
-
