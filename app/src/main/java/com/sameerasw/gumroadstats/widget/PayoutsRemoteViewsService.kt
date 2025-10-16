@@ -107,15 +107,25 @@ class PayoutsRemoteViewsFactory(
         // Get Material You colors for text only
         val colors = WidgetColorHelper.getColors(context, isPayable)
 
-        // Apply rounded card background drawable (with baked-in colors for light/dark mode)
+        // Apply rounded card background drawable based on position
         val cardDrawable = if (isPayable) {
             R.drawable.widget_featured_card_background
         } else {
-            R.drawable.widget_card_background
+            // Determine position in non-payable list
+            val nonPayablePayouts = payouts.filter { !it.status.equals("payable", ignoreCase = true) }
+            val positionInList = nonPayablePayouts.indexOf(payout)
+            val isFirst = positionInList == 0
+            val isLast = positionInList == nonPayablePayouts.size - 1
+            val isSingle = nonPayablePayouts.size == 1
+
+            when {
+                isSingle -> R.drawable.widget_card_background // All corners rounded
+                isFirst -> R.drawable.widget_card_background_first // Top corners rounded
+                isLast -> R.drawable.widget_card_background_last // Bottom corners rounded
+                else -> R.drawable.widget_card_background_middle // Small corners all around
+            }
         }
         views.setInt(R.id.payout_card, "setBackgroundResource", cardDrawable)
-
-        // DO NOT call setBackgroundColor - it breaks the rounded corners!
 
         // Apply text colors
         views.setTextColor(R.id.payout_amount, colors.primaryTextColor)
