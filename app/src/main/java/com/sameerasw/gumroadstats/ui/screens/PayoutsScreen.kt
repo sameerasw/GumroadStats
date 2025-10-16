@@ -8,6 +8,10 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.outlined.HourglassEmpty
+import androidx.compose.material.icons.outlined.AttachMoney
+import androidx.compose.material.icons.outlined.Error
 import androidx.compose.material3.*
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.foundation.layout.Column
@@ -247,7 +251,7 @@ fun PayoutsList(
                     Text(
                         text = "History",
                         style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.padding(start = 4.dp, top = 8.dp, bottom = 4.dp)
+                        modifier = Modifier.padding(start = 4.dp, top = 16.dp, bottom = 8.dp)
                     )
                 }
 
@@ -281,7 +285,7 @@ fun PayablePayoutCard(
             containerColor = MaterialTheme.colorScheme.primaryContainer
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        shape = MaterialTheme.shapes.medium
+        shape = androidx.compose.foundation.shape.RoundedCornerShape(24.dp)
     ) {
         Column(
             modifier = Modifier
@@ -303,9 +307,9 @@ fun PayablePayoutCard(
                     modifier = Modifier.weight(1f)
                 ) {
                     Text(
-                        text = "${payout.amount} ${payout.currency}",
+                        text = "${formatAmount(payout.amount)} ${payout.currency.uppercase()}",
                         style = MaterialTheme.typography.headlineLarge,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
@@ -314,7 +318,7 @@ fun PayablePayoutCard(
                         color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
                     )
                 }
-                StatusChip(status = payout.status)
+                StatusIconChip(status = payout.status)
             }
         }
     }
@@ -330,16 +334,16 @@ fun CompactPayoutCard(
     val shape = when {
         isFirst && isLast -> MaterialTheme.shapes.medium // All corners rounded if single item
         isFirst -> androidx.compose.foundation.shape.RoundedCornerShape(
-            topStart = 16.dp,
-            topEnd = 16.dp,
+            topStart = 24.dp,
+            topEnd = 24.dp,
             bottomStart = 4.dp,
             bottomEnd = 4.dp
         )
         isLast -> androidx.compose.foundation.shape.RoundedCornerShape(
             topStart = 4.dp,
             topEnd = 4.dp,
-            bottomStart = 16.dp,
-            bottomEnd = 16.dp
+            bottomStart = 24.dp,
+            bottomEnd = 24.dp
         )
         else -> androidx.compose.foundation.shape.RoundedCornerShape(4.dp)
     }
@@ -348,7 +352,7 @@ fun CompactPayoutCard(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
         shape = shape
     ) {
         Row(
@@ -362,7 +366,7 @@ fun CompactPayoutCard(
                 modifier = Modifier.weight(1f)
             ) {
                 Text(
-                    text = "${payout.amount} ${payout.currency}",
+                    text = "${formatAmount(payout.amount)} ${payout.currency.uppercase()}",
                     style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.primary
                 )
@@ -374,7 +378,7 @@ fun CompactPayoutCard(
                 )
             }
 
-            StatusChip(status = payout.status)
+            StatusIconChip(status = payout.status)
         }
     }
 }
@@ -466,7 +470,7 @@ fun PayoutDetailsContent(payout: Payout) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
-                    text = "${payout.amount} ${payout.currency}",
+                    text = "${formatAmount(payout.amount)} ${payout.currency.uppercase()}",
                     style = MaterialTheme.typography.headlineMedium,
                     color = MaterialTheme.colorScheme.primary
                 )
@@ -542,6 +546,39 @@ fun StatusChip(status: String) {
             style = MaterialTheme.typography.labelMedium,
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
         )
+    }
+}
+
+@Composable
+fun StatusIconChip(status: String) {
+    val (icon, color) = when (status.lowercase()) {
+        "completed" -> Icons.Outlined.CheckCircle to MaterialTheme.colorScheme.primary
+        "pending", "processing" -> Icons.Outlined.HourglassEmpty to MaterialTheme.colorScheme.tertiary
+        "payable" -> Icons.Outlined.AttachMoney to MaterialTheme.colorScheme.secondary
+        "failed" -> Icons.Outlined.Error to MaterialTheme.colorScheme.error
+        else -> Icons.Outlined.HourglassEmpty to MaterialTheme.colorScheme.outline
+    }
+
+    Surface(
+        color = color.copy(alpha = 0.1f),
+        shape = MaterialTheme.shapes.small,
+        modifier = Modifier.padding(4.dp)
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = status,
+            tint = color,
+            modifier = Modifier.padding(8.dp).size(24.dp)
+        )
+    }
+}
+
+fun formatAmount(amount: String): String {
+    return try {
+        val number = amount.toDoubleOrNull() ?: return amount
+        String.format("%,.2f", number)
+    } catch (e: Exception) {
+        amount
     }
 }
 
