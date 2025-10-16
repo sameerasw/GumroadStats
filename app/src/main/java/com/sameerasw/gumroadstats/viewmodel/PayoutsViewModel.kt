@@ -73,9 +73,12 @@ class PayoutsViewModel(private val context: Context) : ViewModel() {
                     val cachedData = payoutsCache.cachedPayouts.first()
                     if (cachedData.isNotEmpty()) {
                         _uiState.value = PayoutsUiState.Success(cachedData, isOfflineData = true)
+                    } else {
+                        // Show loading state only if there's no cached data
+                        _uiState.value = PayoutsUiState.Loading
                     }
                     // Then fetch fresh payouts data in background
-                    loadPayouts(silent = true)
+                    loadPayouts(silent = cachedData.isNotEmpty())
 
                     // Load cached user data (don't fetch fresh on init)
                     val cachedUser = userCache.cachedUser.first()
@@ -138,44 +141,58 @@ class PayoutsViewModel(private val context: Context) : ViewModel() {
         }
 
         viewModelScope.launch {
-            if (!silent) {
-                _uiState.value = PayoutsUiState.Loading
-            }
-            val result = repository.getPayouts(_accessToken.value)
-            result.fold(
-                onSuccess = { response ->
-                    // Save to cache
-                    payoutsCache.savePayouts(response.payouts)
-                    _uiState.value = PayoutsUiState.Success(response.payouts, isOfflineData = false)
-
-                    // Update widgets when data changes
-                    WidgetUpdateHelper.updateAllWidgets(context)
-                },
-                onFailure = { error ->
-                    // If we have cached data, show it with offline indicator
-                    val cached = payoutsCache.cachedPayouts.first()
-                    if (cached.isNotEmpty()) {
-                        _uiState.value = PayoutsUiState.Success(cached, isOfflineData = true)
-                    } else {
-                        _uiState.value = PayoutsUiState.Error(error.message ?: "Unknown error occurred")
-                    }
+            try {
+                if (!silent) {
+                    _uiState.value = PayoutsUiState.Loading
                 }
-            )
+                val result = repository.getPayouts(_accessToken.value)
+                result.fold(
+                    onSuccess = { response ->
+                        // Save to cache
+                        payoutsCache.savePayouts(response.payouts)
+                        _uiState.value = PayoutsUiState.Success(response.payouts, isOfflineData = false)
+
+                        // Update widgets when data changes
+                        WidgetUpdateHelper.updateAllWidgets(context)
+                    },
+                    onFailure = { error ->
+                        // If we have cached data, show it with offline indicator
+                        val cached = payoutsCache.cachedPayouts.first()
+                        if (cached.isNotEmpty()) {
+                            _uiState.value = PayoutsUiState.Success(cached, isOfflineData = true)
+                        } else {
+                            _uiState.value = PayoutsUiState.Error(error.message ?: "Unknown error occurred")
+                        }
+                    }
+                )
+            } catch (e: Exception) {
+                // Ensure we always update the UI state even if something unexpected happens
+                val cached = payoutsCache.cachedPayouts.first()
+                if (cached.isNotEmpty()) {
+                    _uiState.value = PayoutsUiState.Success(cached, isOfflineData = true)
+                } else {
+                    _uiState.value = PayoutsUiState.Error("An unexpected error occurred: ${e.message}")
+                }
+            }
         }
     }
 
     fun loadPayoutDetails(payoutId: String) {
         viewModelScope.launch {
-            _payoutDetailsState.value = PayoutDetailsState.Loading
-            val result = repository.getPayoutDetails(payoutId, _accessToken.value)
-            result.fold(
-                onSuccess = { payout ->
-                    _payoutDetailsState.value = PayoutDetailsState.Success(payout)
-                },
-                onFailure = { error ->
-                    _payoutDetailsState.value = PayoutDetailsState.Error(error.message ?: "Failed to load details")
-                }
-            )
+            try {
+                _payoutDetailsState.value = PayoutDetailsState.Loading
+                val result = repository.getPayoutDetails(payoutId, _accessToken.value)
+                result.fold(
+                    onSuccess = { payout ->
+                        _payoutDetailsState.value = PayoutDetailsState.Success(payout)
+                    },
+                    onFailure = { error ->
+                        _payoutDetailsState.value = PayoutDetailsState.Error(error.message ?: "Failed to load details")
+                    }
+                )
+            } catch (e: Exception) {
+                _payoutDetailsState.value = PayoutDetailsState.Error("An unexpected error occurred: ${e.message}")
+            }
         }
     }
 
@@ -189,26 +206,36 @@ class PayoutsViewModel(private val context: Context) : ViewModel() {
         }
 
         viewModelScope.launch {
-            if (!silent) {
-                _userState.value = UserState.Loading
-            }
-            val result = repository.getUser(_accessToken.value)
-            result.fold(
-                onSuccess = { user ->
-                    // Save to cache
-                    userCache.saveUser(user)
-                    _userState.value = UserState.Success(user)
-                },
-                onFailure = { error ->
-                    // If we have cached data, show it
-                    val cached = userCache.cachedUser.first()
-                    if (cached != null) {
-                        _userState.value = UserState.Success(cached)
-                    } else {
-                        _userState.value = UserState.Error(error.message ?: "Failed to load user data")
-                    }
+            try {
+                if (!silent) {
+                    _userState.value = UserState.Loading
                 }
-            )
+                val result = repository.getUser(_accessToken.value)
+                result.fold(
+                    onSuccess = { user ->
+                        // Save to cache
+                        userCache.saveUser(user)
+                        _userState.value = UserState.Success(user)
+                    },
+                    onFailure = { error ->
+                        // If we have cached data, show it
+                        val cached = userCache.cachedUser.first()
+                        if (cached != null) {
+                            _userState.value = UserState.Success(cached)
+                        } else {
+                            _userState.value = UserState.Error(error.message ?: "Failed to load user data")
+                        }
+                    }
+                )
+            } catch (e: Exception) {
+                // Fallback to cached data if available
+                val cached = userCache.cachedUser.first()
+                if (cached != null) {
+                    _userState.value = UserState.Success(cached)
+                } else {
+                    _userState.value = UserState.Error("An unexpected error occurred")
+                }
+            }
         }
     }
 
