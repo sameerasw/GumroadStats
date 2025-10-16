@@ -246,14 +246,15 @@ fun PayoutsList(
                 top = 8.dp,
                 bottom = 16.dp
             ),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(3.dp)
         ) {
             if (isOfflineData) {
                 item {
                     Card(
                         colors = CardDefaults.cardColors(
                             containerColor = MaterialTheme.colorScheme.surfaceVariant
-                        )
+                        ),
+                        shape = MaterialTheme.shapes.small
                     ) {
                         Row(
                             modifier = Modifier
@@ -274,13 +275,20 @@ fun PayoutsList(
                             )
                         }
                     }
+                    Spacer(modifier = Modifier.height(8.dp))
                 }
             }
 
-            items(payouts) { payout ->
+            items(payouts.size) { index ->
+                val payout = payouts[index]
+                val isFirst = index == 0
+                val isLast = index == payouts.size - 1
+
                 CompactPayoutCard(
                     payout = payout,
-                    onClick = { onPayoutClick(payout) }
+                    onClick = { onPayoutClick(payout) },
+                    isFirst = isFirst,
+                    isLast = isLast
                 )
             }
         }
@@ -290,13 +298,33 @@ fun PayoutsList(
 @Composable
 fun CompactPayoutCard(
     payout: Payout,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    isFirst: Boolean = false,
+    isLast: Boolean = false
 ) {
+    val shape = when {
+        isFirst && isLast -> MaterialTheme.shapes.medium // All corners rounded if single item
+        isFirst -> androidx.compose.foundation.shape.RoundedCornerShape(
+            topStart = 16.dp,
+            topEnd = 16.dp,
+            bottomStart = 4.dp,
+            bottomEnd = 4.dp
+        )
+        isLast -> androidx.compose.foundation.shape.RoundedCornerShape(
+            topStart = 4.dp,
+            topEnd = 4.dp,
+            bottomStart = 16.dp,
+            bottomEnd = 16.dp
+        )
+        else -> androidx.compose.foundation.shape.RoundedCornerShape(4.dp)
+    }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        shape = shape
     ) {
         Row(
             modifier = Modifier
