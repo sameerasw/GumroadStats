@@ -4,7 +4,9 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sameerasw.gumroadstats.data.local.PayoutsCache
+import com.sameerasw.gumroadstats.data.local.UserCache
 import com.sameerasw.gumroadstats.data.model.Payout
+import com.sameerasw.gumroadstats.data.model.User
 import com.sameerasw.gumroadstats.data.preferences.PreferencesManager
 import com.sameerasw.gumroadstats.data.preferences.UpdateInterval
 import com.sameerasw.gumroadstats.data.repository.GumroadRepository
@@ -31,16 +33,27 @@ sealed class PayoutDetailsState {
     data class Error(val message: String) : PayoutDetailsState()
 }
 
+sealed class UserState {
+    object Idle : UserState()
+    object Loading : UserState()
+    data class Success(val user: User) : UserState()
+    data class Error(val message: String) : UserState()
+}
+
 class PayoutsViewModel(private val context: Context) : ViewModel() {
     private val repository = GumroadRepository()
     private val preferencesManager = PreferencesManager(context)
     private val payoutsCache = PayoutsCache(context)
+    private val userCache = UserCache(context)
 
     private val _uiState = MutableStateFlow<PayoutsUiState>(PayoutsUiState.Initial)
     val uiState: StateFlow<PayoutsUiState> = _uiState.asStateFlow()
 
     private val _payoutDetailsState = MutableStateFlow<PayoutDetailsState>(PayoutDetailsState.Idle)
     val payoutDetailsState: StateFlow<PayoutDetailsState> = _payoutDetailsState.asStateFlow()
+
+    private val _userState = MutableStateFlow<UserState>(UserState.Idle)
+    val userState: StateFlow<UserState> = _userState.asStateFlow()
 
     private val _accessToken = MutableStateFlow("")
     val accessToken: StateFlow<String> = _accessToken.asStateFlow()
@@ -56,13 +69,19 @@ class PayoutsViewModel(private val context: Context) : ViewModel() {
             preferencesManager.accessToken.collect { token ->
                 _accessToken.value = token
                 if (token.isNotEmpty()) {
-                    // Instantly load cached data first
+                    // Instantly load cached payouts data first
                     val cachedData = payoutsCache.cachedPayouts.first()
                     if (cachedData.isNotEmpty()) {
                         _uiState.value = PayoutsUiState.Success(cachedData, isOfflineData = true)
                     }
-                    // Then fetch fresh data in background
+                    // Then fetch fresh payouts data in background
                     loadPayouts(silent = true)
+
+                    // Load cached user data (don't fetch fresh on init)
+                    val cachedUser = userCache.cachedUser.first()
+                    if (cachedUser != null) {
+                        _userState.value = UserState.Success(cachedUser)
+                    }
                 }
             }
         }
@@ -91,7 +110,9 @@ class PayoutsViewModel(private val context: Context) : ViewModel() {
         viewModelScope.launch {
             preferencesManager.clearAccessToken()
             payoutsCache.clearCache()
+            userCache.clearCache()
             _uiState.value = PayoutsUiState.Initial
+            _userState.value = UserState.Idle
         }
     }
 
@@ -160,6 +181,35 @@ class PayoutsViewModel(private val context: Context) : ViewModel() {
 
     fun clearPayoutDetails() {
         _payoutDetailsState.value = PayoutDetailsState.Idle
+    }
+
+    fun loadUser(silent: Boolean = false) {
+        if (_accessToken.value.isEmpty()) {
+            return
+        }
+
+        viewModelScope.launch {
+            if (!silent) {
+                _userState.value = UserState.Loading
+            }
+            val result = repository.getUser(_accessToken.value)
+            result.fold(
+                onSuccess = { user ->
+                    // Save to cache
+                    userCache.saveUser(user)
+                    _userState.value = UserState.Success(user)
+                },
+                onFailure = { error ->
+                    // If we have cached data, show it
+                    val cached = userCache.cachedUser.first()
+                    if (cached != null) {
+                        _userState.value = UserState.Success(cached)
+                    } else {
+                        _userState.value = UserState.Error(error.message ?: "Failed to load user data")
+                    }
+                }
+            )
+        }
     }
 
     override fun onCleared() {

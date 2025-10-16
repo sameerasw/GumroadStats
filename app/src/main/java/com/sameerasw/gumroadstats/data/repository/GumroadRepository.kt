@@ -3,6 +3,7 @@ package com.sameerasw.gumroadstats.data.repository
 import com.sameerasw.gumroadstats.data.api.RetrofitClient
 import com.sameerasw.gumroadstats.data.model.Payout
 import com.sameerasw.gumroadstats.data.model.PayoutsResponse
+import com.sameerasw.gumroadstats.data.model.User
 
 class GumroadRepository {
     private val apiService = RetrofitClient.apiService
@@ -29,6 +30,17 @@ class GumroadRepository {
         return try {
             val response = apiService.getPayoutDetails(payoutId, accessToken)
             Result.success(response.payout)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun getUser(
+        accessToken: String
+    ): Result<User> {
+        return try {
+            val response = apiService.getUser(accessToken)
+            Result.success(response.user)
         } catch (e: Exception) {
             Result.failure(e)
         }

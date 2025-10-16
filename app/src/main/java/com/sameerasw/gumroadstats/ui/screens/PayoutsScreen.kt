@@ -20,8 +20,8 @@ import com.sameerasw.gumroadstats.ui.components.sheets.PayoutDetailsSheet
 import com.sameerasw.gumroadstats.viewmodel.PayoutDetailsState
 import com.sameerasw.gumroadstats.viewmodel.PayoutsUiState
 import com.sameerasw.gumroadstats.viewmodel.PayoutsViewModel
+import com.sameerasw.gumroadstats.viewmodel.UserState
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 /**
  * Main screen for displaying Gumroad payouts
@@ -36,6 +36,7 @@ fun PayoutsScreen(
     val uiState by viewModel.uiState.collectAsState()
     val accessToken by viewModel.accessToken.collectAsState()
     val payoutDetailsState by viewModel.payoutDetailsState.collectAsState()
+    val userState by viewModel.userState.collectAsState()
     var tokenInput by remember { mutableStateOf("") }
     val keyboardController = LocalSoftwareKeyboardController.current
     val sheetState = rememberModalBottomSheetState()
@@ -117,6 +118,7 @@ fun PayoutsScreen(
                                 isRefreshing = true
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                 viewModel.loadPayouts()
+                                viewModel.loadUser()
                             },
                             modifier = Modifier.fillMaxSize()
                         ) {
@@ -129,6 +131,7 @@ fun PayoutsScreen(
 
                             PayoutsList(
                                 payouts = state.payouts,
+                                user = (userState as? UserState.Success)?.user,
                                 onPayoutClick = { payout ->
                                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                     payout.id?.let { viewModel.loadPayoutDetails(it) }

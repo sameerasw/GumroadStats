@@ -18,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.sameerasw.gumroadstats.data.model.Payout
+import com.sameerasw.gumroadstats.data.model.User
 
 /**
  * List component that displays all payouts with payable payout highlighted at top
@@ -25,6 +26,7 @@ import com.sameerasw.gumroadstats.data.model.Payout
 @Composable
 fun PayoutsList(
     payouts: List<Payout>,
+    user: User? = null,
     onPayoutClick: (Payout) -> Unit
 ) {
     if (payouts.isEmpty()) {
@@ -73,15 +75,18 @@ fun PayoutsList(
         ) {
             // Horizontal pager for cards at top
             item(key = "cards_carousel") {
-                val cardsCount = if (payablePayout != null) 1 + totalCollectedByCurrency.size else totalCollectedByCurrency.size
+                // Count cards: payable payout (if available) + total collected cards + user (if available)
+                val payableCardCount = if (payablePayout != null) 1 else 0
+                val userCardCount = if (user != null) 1 else 0
+                val cardsCount = payableCardCount + totalCollectedByCurrency.size + userCardCount
 
                 if (cardsCount > 0) {
                     val pagerState = rememberPagerState(pageCount = { cardsCount })
 
                     HorizontalPager(
                         state = pagerState,
-                        contentPadding = PaddingValues(horizontal = 48.dp),
-                        pageSpacing = 16.dp,
+                        contentPadding = PaddingValues(horizontal = 16.dp),
+                        pageSpacing = 4.dp,
                         modifier = Modifier.fillMaxWidth()
                     ) { page ->
                         when {
@@ -92,9 +97,9 @@ fun PayoutsList(
                                     onClick = { onPayoutClick(payablePayout) }
                                 )
                             }
-                            // Remaining pages: Total collected cards for each currency
-                            else -> {
-                                val currencyIndex = if (payablePayout != null) page - 1 else page
+                            // Middle pages: Total collected cards for each currency
+                            page < payableCardCount + totalCollectedByCurrency.size -> {
+                                val currencyIndex = page - payableCardCount
                                 val currencyEntry = totalCollectedByCurrency.entries.elementAtOrNull(currencyIndex)
 
                                 currencyEntry?.let { (currency, totalAndCount) ->
@@ -103,6 +108,15 @@ fun PayoutsList(
                                         totalAmount = total,
                                         currency = currency,
                                         payoutCount = count,
+                                        onClick = { }
+                                    )
+                                }
+                            }
+                            // Last page: User info card (if user is available)
+                            else -> {
+                                user?.let { userData ->
+                                    UserInfoCard(
+                                        user = userData,
                                         onClick = { }
                                     )
                                 }

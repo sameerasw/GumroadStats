@@ -3,8 +3,11 @@ package com.sameerasw.gumroadstats.ui.components.cards
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,10 +33,7 @@ fun TotalCollectedCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = {
-                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                onClick()
-            }),
+            .height(160.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.secondaryContainer
         ),
@@ -42,37 +42,52 @@ fun TotalCollectedCard(
     ) {
         Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp)
+                .fillMaxSize()
+                .clickable(onClick = {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    onClick()
+                })
+                .padding(20.dp),
+            verticalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(
-                text = "Total Collected",
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onSecondaryContainer
+            // Icon at the top
+            Icon(
+                imageVector = Icons.Default.AttachMoney,
+                contentDescription = "Total Collected",
+                tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                modifier = Modifier.size(32.dp)
             )
-            Spacer(modifier = Modifier.height(8.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(
-                    modifier = Modifier.weight(1f)
+
+            // Total info
+            Column {
+                Text(
+                    text = "Total Collected",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Bottom
                 ) {
-                    Text(
-                        text = "${formatAmount(totalAmount.toString())} ${currency.uppercase()}",
-                        style = MaterialTheme.typography.headlineLarge,
-                        color = MaterialTheme.colorScheme.onSecondaryContainer,
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "$payoutCount completed payout${if (payoutCount != 1) "s" else ""}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.8f)
-                    )
+                    Column(
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(
+                            text = "${formatAmount(totalAmount.toString())} ${currency.uppercase()}",
+                            style = MaterialTheme.typography.headlineMedium,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer,
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = "$payoutCount completed payout${if (payoutCount != 1) "s" else ""}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.8f)
+                        )
+                    }
                 }
             }
         }
     }
 }
-
