@@ -3,15 +3,14 @@ package com.sameerasw.gumroadstats.ui.screens
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -51,33 +50,8 @@ fun PayoutsScreen(
         topBar = {
             if (accessToken.isNotEmpty()) {
                 TopAppBar(
-                    title = {
-                        Column {
-                            Text("Gumroad Payouts")
-                            if (uiState is PayoutsUiState.Success && (uiState as PayoutsUiState.Success).isOfflineData) {
-                                Text(
-                                    "Offline Mode",
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                        }
-                    },
+                    title = { Text("Gumroad Payouts") },
                     actions = {
-                        if (uiState is PayoutsUiState.Success && (uiState as PayoutsUiState.Success).isOfflineData) {
-                            Icon(
-                                imageVector = Icons.Default.Info,
-                                contentDescription = "Offline",
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.padding(end = 8.dp)
-                            )
-                        }
-                        IconButton(onClick = { viewModel.loadPayouts() }) {
-                            Icon(
-                                imageVector = Icons.Default.Refresh,
-                                contentDescription = "Refresh"
-                            )
-                        }
                         IconButton(onClick = onNavigateToSettings) {
                             Icon(
                                 imageVector = Icons.Default.Settings,
@@ -163,25 +137,23 @@ fun PayoutsScreen(
                             modifier = Modifier.fillMaxSize(),
                             contentAlignment = Alignment.Center
                         ) {
-                            CircularProgressIndicator()
-                        }
-                    }
-                    is PayoutsUiState.Loading -> {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CircularProgressIndicator()
+                            // LoadingIndicator removed
                         }
                     }
                     is PayoutsUiState.Success -> {
-                        PayoutsList(
-                            payouts = state.payouts,
-                            isOfflineData = state.isOfflineData,
-                            onPayoutClick = { payout ->
-                                payout.id?.let { viewModel.loadPayoutDetails(it) }
-                            }
-                        )
+                        PullToRefreshBox(
+                            isRefreshing = state.isOfflineData,
+                            onRefresh = { viewModel.loadPayouts() },
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            PayoutsList(
+                                payouts = state.payouts,
+                                isOfflineData = state.isOfflineData,
+                                onPayoutClick = { payout ->
+                                    payout.id?.let { viewModel.loadPayoutDetails(it) }
+                                }
+                            )
+                        }
                     }
                     is PayoutsUiState.Error -> {
                         Column(
@@ -199,6 +171,8 @@ fun PayoutsScreen(
                             }
                         }
                     }
+
+                    PayoutsUiState.Loading -> TODO()
                 }
             }
         }
@@ -224,6 +198,7 @@ fun PayoutsScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PayoutsList(
     payouts: List<Payout>,
@@ -238,6 +213,14 @@ fun PayoutsList(
             Text("No payouts found")
         }
     } else {
+        // Separate payable payout (if exists) from the rest
+        val payablePayout = payouts.firstOrNull { it.status.equals("payable", ignoreCase = true) }
+        val historyPayouts = if (payablePayout != null) {
+            payouts.filter { it != payablePayout }
+        } else {
+            payouts
+        }
+
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(
@@ -248,48 +231,90 @@ fun PayoutsList(
             ),
             verticalArrangement = Arrangement.spacedBy(3.dp)
         ) {
-            if (isOfflineData) {
+            // Payable card at top with primary styling
+            if (payablePayout != null) {
                 item {
-                    Card(
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant
-                        ),
-                        shape = MaterialTheme.shapes.small
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(12.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Info,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.padding(end = 8.dp)
-                            )
-                            Text(
-                                text = "Showing cached data. Tap refresh for latest updates.",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(8.dp))
+                    PayablePayoutCard(
+                        payout = payablePayout,
+                        onClick = { onPayoutClick(payablePayout) }
+                    )
                 }
             }
 
-            items(payouts.size) { index ->
-                val payout = payouts[index]
-                val isFirst = index == 0
-                val isLast = index == payouts.size - 1
+            // History section
+            if (historyPayouts.isNotEmpty()) {
+                item {
+                    Text(
+                        text = "History",
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.padding(start = 4.dp, top = 8.dp, bottom = 4.dp)
+                    )
+                }
 
-                CompactPayoutCard(
-                    payout = payout,
-                    onClick = { onPayoutClick(payout) },
-                    isFirst = isFirst,
-                    isLast = isLast
-                )
+                items(historyPayouts.size) { index ->
+                    val payout = historyPayouts[index]
+                    val isFirst = index == 0
+                    val isLast = index == historyPayouts.size - 1
+
+                    CompactPayoutCard(
+                        payout = payout,
+                        onClick = { onPayoutClick(payout) },
+                        isFirst = isFirst,
+                        isLast = isLast
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun PayablePayoutCard(
+    payout: Payout,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        shape = MaterialTheme.shapes.medium
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp)
+        ) {
+            Text(
+                text = "Available Payout",
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onPrimaryContainer
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(
+                        text = "${payout.amount} ${payout.currency}",
+                        style = MaterialTheme.typography.headlineLarge,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = formatDate(payout.createdAt),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+                    )
+                }
+                StatusChip(status = payout.status)
             }
         }
     }
@@ -385,7 +410,7 @@ fun PayoutDetailsSheet(
             }
         }
 
-        Divider()
+        HorizontalDivider()
 
         when (detailsState) {
             is PayoutDetailsState.Loading -> {
@@ -395,7 +420,7 @@ fun PayoutDetailsSheet(
                         .padding(64.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator()
+                    // LoadingIndicator removed
                 }
             }
             is PayoutDetailsState.Success -> {
@@ -449,7 +474,7 @@ fun PayoutDetailsContent(payout: Payout) {
             StatusChip(status = payout.status)
         }
 
-        Divider()
+        HorizontalDivider()
 
         // Payment Details
         DetailRow(label = "Payment Processor", value = payout.paymentProcessor.uppercase())
@@ -462,7 +487,7 @@ fun PayoutDetailsContent(payout: Payout) {
             DetailRow(label = "PayPal Email", value = payout.paypalEmail)
         }
 
-        Divider()
+        HorizontalDivider()
 
         // Dates
         DetailRow(label = "Created", value = formatDate(payout.createdAt))
@@ -472,7 +497,7 @@ fun PayoutDetailsContent(payout: Payout) {
         }
 
         if (payout.id != null) {
-            Divider()
+            HorizontalDivider()
             DetailRow(label = "Payout ID", value = payout.id)
         }
     }
