@@ -37,14 +37,18 @@ fun SettingsScreen(
                     }
                 }
             )
-        }
+        },
+        modifier = modifier
     ) { padding ->
         Column(
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(16.dp)
+                .windowInsetsPadding(WindowInsets.navigationBars)
+                .padding(horizontal = 16.dp)
         ) {
+            Spacer(modifier = Modifier.height(16.dp))
+
             Text(
                 text = "Auto-Update Settings",
                 style = MaterialTheme.typography.titleMedium,
@@ -128,7 +132,7 @@ fun SettingsScreen(
                                 color = MaterialTheme.colorScheme.error
                             )
                             Text(
-                                text = "Remove saved token from device",
+                                text = "Remove saved token and cached data",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -143,7 +147,7 @@ fun SettingsScreen(
         AlertDialog(
             onDismissRequest = { showClearDialog = false },
             title = { Text("Clear Access Token?") },
-            text = { Text("This will remove your saved access token. You'll need to enter it again next time.") },
+            text = { Text("This will remove your saved access token and cached data. You'll need to enter it again next time.") },
             confirmButton = {
                 TextButton(
                     onClick = {

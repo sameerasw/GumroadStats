@@ -8,6 +8,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -38,8 +39,27 @@ fun PayoutsScreen(
         topBar = {
             if (accessToken.isNotEmpty()) {
                 TopAppBar(
-                    title = { Text("Gumroad Payouts") },
+                    title = {
+                        Column {
+                            Text("Gumroad Payouts")
+                            if (uiState is PayoutsUiState.Success && (uiState as PayoutsUiState.Success).isOfflineData) {
+                                Text(
+                                    "Offline Mode",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    },
                     actions = {
+                        if (uiState is PayoutsUiState.Success && (uiState as PayoutsUiState.Success).isOfflineData) {
+                            Icon(
+                                imageVector = Icons.Default.Info,
+                                contentDescription = "Offline",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(end = 8.dp)
+                            )
+                        }
                         IconButton(onClick = { viewModel.loadPayouts() }) {
                             Icon(
                                 imageVector = Icons.Default.Refresh,
@@ -55,18 +75,20 @@ fun PayoutsScreen(
                     }
                 )
             }
-        }
+        },
+        modifier = modifier
     ) { padding ->
         Column(
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(16.dp)
         ) {
             if (accessToken.isEmpty()) {
-                // Access Token Input Screen
+                // Access Token Input Screen - properly handle edge-to-edge
                 Column(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 16.dp),
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
@@ -139,7 +161,10 @@ fun PayoutsScreen(
                         }
                     }
                     is PayoutsUiState.Success -> {
-                        PayoutsList(payouts = state.payouts)
+                        PayoutsList(
+                            payouts = state.payouts,
+                            isOfflineData = state.isOfflineData
+                        )
                     }
                     is PayoutsUiState.Error -> {
                         Column(
@@ -164,7 +189,10 @@ fun PayoutsScreen(
 }
 
 @Composable
-fun PayoutsList(payouts: List<Payout>) {
+fun PayoutsList(
+    payouts: List<Payout>,
+    isOfflineData: Boolean = false
+) {
     if (payouts.isEmpty()) {
         Box(
             modifier = Modifier.fillMaxSize(),
@@ -174,9 +202,46 @@ fun PayoutsList(payouts: List<Payout>) {
         }
     } else {
         LazyColumn(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .windowInsetsPadding(WindowInsets.navigationBars),
+            contentPadding = PaddingValues(
+                start = 16.dp,
+                end = 16.dp,
+                top = 8.dp,
+                bottom = 16.dp
+            ),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
+            if (isOfflineData) {
+                item {
+                    Card(
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant
+                        )
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Info,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(end = 8.dp)
+                            )
+                            Text(
+                                text = "Showing cached data. Tap refresh for latest updates.",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+                }
+            }
+
             items(payouts) { payout ->
                 PayoutCard(payout = payout)
             }

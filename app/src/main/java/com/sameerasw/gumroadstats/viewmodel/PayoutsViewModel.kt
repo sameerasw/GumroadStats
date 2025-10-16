@@ -3,6 +3,7 @@ package com.sameerasw.gumroadstats.viewmodel
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.sameerasw.gumroadstats.data.local.PayoutsCache
 import com.sameerasw.gumroadstats.data.model.Payout
 import com.sameerasw.gumroadstats.data.preferences.PreferencesManager
 import com.sameerasw.gumroadstats.data.preferences.UpdateInterval
@@ -12,18 +13,20 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 sealed class PayoutsUiState {
     object Initial : PayoutsUiState()
     object Loading : PayoutsUiState()
-    data class Success(val payouts: List<Payout>) : PayoutsUiState()
+    data class Success(val payouts: List<Payout>, val isOfflineData: Boolean = false) : PayoutsUiState()
     data class Error(val message: String) : PayoutsUiState()
 }
 
 class PayoutsViewModel(context: Context) : ViewModel() {
     private val repository = GumroadRepository()
     private val preferencesManager = PreferencesManager(context)
+    private val payoutsCache = PayoutsCache(context)
 
     private val _uiState = MutableStateFlow<PayoutsUiState>(PayoutsUiState.Initial)
     val uiState: StateFlow<PayoutsUiState> = _uiState.asStateFlow()
@@ -42,7 +45,13 @@ class PayoutsViewModel(context: Context) : ViewModel() {
             preferencesManager.accessToken.collect { token ->
                 _accessToken.value = token
                 if (token.isNotEmpty()) {
-                    loadPayouts()
+                    // Instantly load cached data first
+                    val cachedData = payoutsCache.cachedPayouts.first()
+                    if (cachedData.isNotEmpty()) {
+                        _uiState.value = PayoutsUiState.Success(cachedData, isOfflineData = true)
+                    }
+                    // Then fetch fresh data in background
+                    loadPayouts(silent = true)
                 }
             }
         }
@@ -70,6 +79,7 @@ class PayoutsViewModel(context: Context) : ViewModel() {
     fun clearAccessToken() {
         viewModelScope.launch {
             preferencesManager.clearAccessToken()
+            payoutsCache.clearCache()
             _uiState.value = PayoutsUiState.Initial
         }
     }
@@ -102,10 +112,18 @@ class PayoutsViewModel(context: Context) : ViewModel() {
             val result = repository.getPayouts(_accessToken.value)
             result.fold(
                 onSuccess = { response ->
-                    _uiState.value = PayoutsUiState.Success(response.payouts)
+                    // Save to cache
+                    payoutsCache.savePayouts(response.payouts)
+                    _uiState.value = PayoutsUiState.Success(response.payouts, isOfflineData = false)
                 },
                 onFailure = { error ->
-                    _uiState.value = PayoutsUiState.Error(error.message ?: "Unknown error occurred")
+                    // If we have cached data, show it with offline indicator
+                    val cached = payoutsCache.cachedPayouts.first()
+                    if (cached.isNotEmpty()) {
+                        _uiState.value = PayoutsUiState.Success(cached, isOfflineData = true)
+                    } else {
+                        _uiState.value = PayoutsUiState.Error(error.message ?: "Unknown error occurred")
+                    }
                 }
             )
         }
