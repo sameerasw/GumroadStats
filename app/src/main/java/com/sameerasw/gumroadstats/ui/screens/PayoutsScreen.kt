@@ -3,6 +3,7 @@ package com.sameerasw.gumroadstats.ui.screens
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -18,6 +19,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -26,6 +29,7 @@ import com.sameerasw.gumroadstats.data.model.Payout
 import com.sameerasw.gumroadstats.viewmodel.PayoutsUiState
 import com.sameerasw.gumroadstats.viewmodel.PayoutsViewModel
 import com.sameerasw.gumroadstats.viewmodel.PayoutDetailsState
+import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -43,11 +47,23 @@ fun PayoutsScreen(
     val keyboardController = LocalSoftwareKeyboardController.current
     val sheetState = rememberModalBottomSheetState()
     var showBottomSheet by remember { mutableStateOf(false) }
+    val haptic = LocalHapticFeedback.current
+    var isRefreshing by remember { mutableStateOf(false) }
 
     // Show bottom sheet when details are loaded
     LaunchedEffect(payoutDetailsState) {
         showBottomSheet = payoutDetailsState is PayoutDetailsState.Success ||
                          payoutDetailsState is PayoutDetailsState.Loading
+    }
+
+    // Continuous haptic feedback during pull-to-refresh
+    LaunchedEffect(isRefreshing) {
+        if (isRefreshing) {
+            while (isRefreshing) {
+                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                delay(100)
+            }
+        }
     }
 
     Scaffold(
@@ -56,7 +72,10 @@ fun PayoutsScreen(
                 TopAppBar(
                     title = { Text("Gumroad Payouts") },
                     actions = {
-                        IconButton(onClick = onNavigateToSettings) {
+                        IconButton(onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            onNavigateToSettings()
+                        }) {
                             Icon(
                                 imageVector = Icons.Default.Settings,
                                 contentDescription = "Settings"
@@ -108,6 +127,7 @@ fun PayoutsScreen(
                             onDone = {
                                 keyboardController?.hide()
                                 if (tokenInput.isNotEmpty()) {
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                     viewModel.setAccessToken(tokenInput)
                                 }
                             }
@@ -118,6 +138,7 @@ fun PayoutsScreen(
                     Button(
                         onClick = {
                             if (tokenInput.isNotEmpty()) {
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                 viewModel.setAccessToken(tokenInput)
                             }
                         },
@@ -141,19 +162,31 @@ fun PayoutsScreen(
                             modifier = Modifier.fillMaxSize(),
                             contentAlignment = Alignment.Center
                         ) {
-                            // LoadingIndicator removed
+                            CircularProgressIndicator()
                         }
                     }
                     is PayoutsUiState.Success -> {
                         PullToRefreshBox(
                             isRefreshing = state.isOfflineData,
-                            onRefresh = { viewModel.loadPayouts() },
+                            onRefresh = {
+                                isRefreshing = true
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                viewModel.loadPayouts()
+                            },
                             modifier = Modifier.fillMaxSize()
                         ) {
+                            // Stop haptic when refresh completes
+                            LaunchedEffect(state.isOfflineData) {
+                                if (!state.isOfflineData) {
+                                    isRefreshing = false
+                                }
+                            }
+
                             PayoutsList(
                                 payouts = state.payouts,
                                 isOfflineData = state.isOfflineData,
                                 onPayoutClick = { payout ->
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                     payout.id?.let { viewModel.loadPayoutDetails(it) }
                                 }
                             )
@@ -170,13 +203,23 @@ fun PayoutsScreen(
                                 color = MaterialTheme.colorScheme.error,
                                 modifier = Modifier.padding(bottom = 16.dp)
                             )
-                            Button(onClick = { viewModel.loadPayouts() }) {
+                            Button(onClick = {
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                viewModel.loadPayouts()
+                            }) {
                                 Text("Retry")
                             }
                         }
                     }
 
-                    PayoutsUiState.Loading -> TODO()
+                    PayoutsUiState.Loading -> {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator()
+                        }
+                    }
                 }
             }
         }
@@ -218,11 +261,15 @@ fun PayoutsList(
         }
     } else {
         // Separate payable payout (if exists) from the rest
-        val payablePayout = payouts.firstOrNull { it.status.equals("payable", ignoreCase = true) }
-        val historyPayouts = if (payablePayout != null) {
-            payouts.filter { it != payablePayout }
-        } else {
-            payouts
+        val payablePayout = remember(payouts) {
+            payouts.firstOrNull { it.status.equals("payable", ignoreCase = true) }
+        }
+        val historyPayouts = remember(payouts, payablePayout) {
+            if (payablePayout != null) {
+                payouts.filter { it != payablePayout }
+            } else {
+                payouts
+            }
         }
 
         LazyColumn(
@@ -237,7 +284,7 @@ fun PayoutsList(
         ) {
             // Payable card at top with primary styling
             if (payablePayout != null) {
-                item {
+                item(key = "payable_${payablePayout.id}") {
                     PayablePayoutCard(
                         payout = payablePayout,
                         onClick = { onPayoutClick(payablePayout) }
@@ -247,7 +294,7 @@ fun PayoutsList(
 
             // History section
             if (historyPayouts.isNotEmpty()) {
-                item {
+                item(key = "history_header") {
                     Text(
                         text = "History",
                         style = MaterialTheme.typography.titleMedium,
@@ -255,8 +302,10 @@ fun PayoutsList(
                     )
                 }
 
-                items(historyPayouts.size) { index ->
-                    val payout = historyPayouts[index]
+                itemsIndexed(
+                    items = historyPayouts,
+                    key = { _, payout -> payout.id ?: payout.createdAt }
+                ) { index, payout ->
                     val isFirst = index == 0
                     val isLast = index == historyPayouts.size - 1
 
@@ -277,10 +326,15 @@ fun PayablePayoutCard(
     payout: Payout,
     onClick: () -> Unit
 ) {
+    val haptic = LocalHapticFeedback.current
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick),
+            .clickable(onClick = {
+                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                onClick()
+            }),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer
         ),
@@ -389,6 +443,8 @@ fun PayoutDetailsSheet(
     detailsState: PayoutDetailsState,
     onDismiss: () -> Unit
 ) {
+    val haptic = LocalHapticFeedback.current
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -406,7 +462,10 @@ fun PayoutDetailsSheet(
                 text = "Payout Details",
                 style = MaterialTheme.typography.headlineSmall
             )
-            IconButton(onClick = onDismiss) {
+            IconButton(onClick = {
+                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                onDismiss()
+            }) {
                 Icon(
                     imageVector = Icons.Default.Close,
                     contentDescription = "Close"

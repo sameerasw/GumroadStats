@@ -9,6 +9,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
 import com.sameerasw.gumroadstats.data.preferences.UpdateInterval
 
@@ -23,13 +25,17 @@ fun SettingsScreen(
 ) {
     var showClearDialog by remember { mutableStateOf(false) }
     var showIntervalMenu by remember { mutableStateOf(false) }
+    val haptic = LocalHapticFeedback.current
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Settings") },
                 navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
+                    IconButton(onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        onNavigateBack()
+                    }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Back"
@@ -70,7 +76,10 @@ fun SettingsScreen(
 
                     Box {
                         OutlinedButton(
-                            onClick = { showIntervalMenu = true },
+                            onClick = {
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                showIntervalMenu = true
+                            },
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Text(currentInterval.displayName)
@@ -84,6 +93,7 @@ fun SettingsScreen(
                                 DropdownMenuItem(
                                     text = { Text(interval.displayName) },
                                     onClick = {
+                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                         onIntervalChange(interval)
                                         showIntervalMenu = false
                                     },
@@ -120,7 +130,10 @@ fun SettingsScreen(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { showClearDialog = true }
+                            .clickable {
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                showClearDialog = true
+                            }
                             .padding(vertical = 8.dp),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
@@ -145,12 +158,16 @@ fun SettingsScreen(
 
     if (showClearDialog) {
         AlertDialog(
-            onDismissRequest = { showClearDialog = false },
+            onDismissRequest = {
+                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                showClearDialog = false
+            },
             title = { Text("Clear Access Token?") },
             text = { Text("This will remove your saved access token and cached data. You'll need to enter it again next time.") },
             confirmButton = {
                 TextButton(
                     onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                         onClearToken()
                         showClearDialog = false
                         onNavigateBack()
@@ -160,7 +177,10 @@ fun SettingsScreen(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showClearDialog = false }) {
+                TextButton(onClick = {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    showClearDialog = false
+                }) {
                     Text("Cancel")
                 }
             }
