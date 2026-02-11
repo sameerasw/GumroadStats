@@ -6,6 +6,8 @@ import com.sameerasw.gumroadstats.data.model.ErrorResponse
 import com.sameerasw.gumroadstats.data.model.Payout
 import com.sameerasw.gumroadstats.data.model.PayoutsResponse
 import com.sameerasw.gumroadstats.data.model.User
+import com.sameerasw.gumroadstats.data.model.Sale
+import com.sameerasw.gumroadstats.data.model.SalesResponse
 import retrofit2.HttpException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
@@ -79,6 +81,38 @@ class GumroadRepository {
         return try {
             val response = apiService.getUser(accessToken)
             Result.success(response.user)
+        } catch (e: Exception) {
+            Result.failure(Exception(parseErrorMessage(e)))
+        }
+    }
+
+    suspend fun getSales(
+        accessToken: String,
+        after: String? = null,
+        before: String? = null,
+        productId: String? = null,
+        email: String? = null,
+        orderId: String? = null,
+        pageKey: String? = null
+    ): Result<SalesResponse> { // Fixed return type
+        // Wait, I need to check imports. I added SalesResponse in API service but I need it here too.
+        // And the return type of apiService.getSales is SalesResponse.
+        return try {
+            val response = apiService.getSales(accessToken, after, before, productId, email, orderId, pageKey)
+            Result.success(response) 
+            // Type mismatch if I use PayoutsResponse. I need to make sure I use SalesResponse.
+        } catch (e: Exception) {
+            Result.failure(Exception(parseErrorMessage(e)))
+        }
+    }
+
+    suspend fun getSaleDetails(
+        saleId: String,
+        accessToken: String
+    ): Result<Sale> {
+        return try {
+            val response = apiService.getSaleDetails(saleId, accessToken)
+            Result.success(response.sale)
         } catch (e: Exception) {
             Result.failure(Exception(parseErrorMessage(e)))
         }

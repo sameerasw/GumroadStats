@@ -60,32 +60,9 @@ fun PayoutsScreen(
         }
     }
 
-    Scaffold(
-        topBar = {
-            if (accessToken.isNotEmpty()) {
-                TopAppBar(
-                    title = { Text("Gumroad Payouts") },
-                    actions = {
-                        IconButton(onClick = {
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            onNavigateToSettings()
-                        }) {
-                            Icon(
-                                imageVector = Icons.Default.Settings,
-                                contentDescription = "Settings"
-                            )
-                        }
-                    }
-                )
-            }
-        },
-        contentWindowInsets = WindowInsets(0, 0, 0, 0),
-        modifier = modifier
-    ) { padding ->
+    Box(modifier = modifier) {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
+            modifier = Modifier.fillMaxSize()
         ) {
             if (accessToken.isEmpty()) {
                 // Access Token Input Screen

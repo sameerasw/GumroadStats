@@ -69,7 +69,7 @@ fun PayoutsList(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(
                 top = 8.dp,
-                bottom = 16.dp
+                bottom = 100.dp
             ),
             verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {

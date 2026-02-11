@@ -15,9 +15,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import com.sameerasw.gumroadstats.ui.screens.MainScreen
 import com.sameerasw.gumroadstats.ui.screens.PayoutsScreen
 import com.sameerasw.gumroadstats.ui.theme.GumroadStatsTheme
 import com.sameerasw.gumroadstats.viewmodel.PayoutsViewModel
+import com.sameerasw.gumroadstats.viewmodel.SalesViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,17 +51,27 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    val viewModel: PayoutsViewModel = viewModel(
+                    val payoutsViewModel: PayoutsViewModel = viewModel(
                         factory = object : ViewModelProvider.Factory {
                             @Suppress("UNCHECKED_CAST")
                             override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                                return PayoutsViewModel(applicationContext) as T
+                                return PayoutsViewModel(application) as T
                             }
                         }
                     )
 
-                    PayoutsScreen(
-                        viewModel = viewModel,
+                    val salesViewModel: SalesViewModel = viewModel(
+                        factory = object : ViewModelProvider.Factory {
+                            @Suppress("UNCHECKED_CAST")
+                            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                                return SalesViewModel(application) as T
+                            }
+                        }
+                    )
+
+                    MainScreen(
+                        payoutsViewModel = payoutsViewModel,
+                        salesViewModel = salesViewModel,
                         onNavigateToSettings = {
                             startActivity(Intent(this@MainActivity, SettingsActivity::class.java))
                         }
