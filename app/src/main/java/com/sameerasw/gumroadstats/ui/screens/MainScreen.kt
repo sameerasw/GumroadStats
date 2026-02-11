@@ -10,6 +10,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.Inventory
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.ShoppingCart
 import com.sameerasw.gumroadstats.viewmodel.ProductsViewModel
@@ -29,6 +30,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -43,6 +45,7 @@ import com.sameerasw.gumroadstats.viewmodel.PayoutsViewModel
 import androidx.compose.ui.res.stringResource
 import com.sameerasw.gumroadstats.R
 import com.sameerasw.gumroadstats.viewmodel.SalesViewModel
+import com.sameerasw.gumroadstats.ui.components.sheets.AboutBottomSheet
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -56,6 +59,7 @@ fun MainScreen(
     val haptic = LocalHapticFeedback.current
     val pagerState = rememberPagerState(pageCount = { 3 })
     val scope = rememberCoroutineScope()
+    var showAboutSheet by remember { mutableStateOf(false) }
     
     val tabPayouts = stringResource(R.string.tab_payouts)
     val tabSales = stringResource(R.string.tab_sales)
@@ -90,6 +94,15 @@ fun MainScreen(
                     )
                 },
                 actions = {
+                    IconButton(onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        showAboutSheet = true
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.Info,
+                            contentDescription = stringResource(R.string.about_section)
+                        )
+                    }
                     IconButton(onClick = {
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                         onNavigateToSettings()
@@ -152,5 +165,14 @@ fun MainScreen(
     // Haptic feedback on page change
     LaunchedEffect(pagerState.currentPage) {
         HapticUtil.performLightTick(haptic)
+    }
+
+    if (showAboutSheet) {
+        AboutBottomSheet(
+            onDismissRequest = { showAboutSheet = false },
+            onToggleDeveloperMode = {
+                // Developer mode logic
+            }
+        )
     }
 }

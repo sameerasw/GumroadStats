@@ -231,9 +231,9 @@ fun SettingsScreen(
                 }
             }
 
+
             Spacer(modifier = Modifier.height(16.dp))
             
-
             // Account Settings
             RoundedCardContainer {
                 Card(
@@ -275,111 +275,10 @@ fun SettingsScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // About Section
-            RoundedCardContainer {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = MaterialTheme.shapes.extraSmall,
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHighest),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-                ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(24.dp)
-                    ) {
-                        Image(
-                            painter = painterResource(id = R.drawable.avatar),
-                            contentDescription = stringResource(R.string.developer_avatar),
-                            modifier = Modifier
-                                .size(80.dp)
-                                .clip(CircleShape)
-                                .pointerInput(Unit) {
-                                    detectTapGestures(
-                                        onLongPress = {
-                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                            val message = context.getString(R.string.made_with_love_by_sameera)
-                                            Toast
-                                                .makeText(
-                                                    context,
-                                                    message,
-                                                    Toast.LENGTH_SHORT
-                                                )
-                                                .show()
-                                        }
-                                    )
-                                }
-                        )
-                        
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        Text(
-                            text = stringResource(R.string.app_name),
-                            style = MaterialTheme.typography.headlineSmall,
-                            textAlign = TextAlign.Center
-                        )
-                        
-                        Text(
-                            text = stringResource(R.string.version_format, versionName ?: ""),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        Text(
-                            text = stringResource(R.string.app_description),
-                            style = MaterialTheme.typography.bodyMedium,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.padding(horizontal = 8.dp)
-                        )
-
-                        Spacer(modifier = Modifier.height(24.dp))
-
-                        // GitHub button
-                        Button(
-                            onClick = {
-                                val githubUrl = "https://github.com/sameerasw/GumroadStats"
-                                val intent = Intent(Intent.ACTION_VIEW, githubUrl.toUri())
-                                context.startActivity(intent)
-                            },
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text(stringResource(R.string.view_on_github))
-                        }
-
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        // My website button
-                        OutlinedButton(
-                            onClick = {
-                                val websiteUrl = "https://www.sameerasw.com"
-                                val intent = Intent(Intent.ACTION_VIEW, websiteUrl.toUri())
-                                context.startActivity(intent)
-                            },
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text(stringResource(R.string.visit_my_website))
-                        }
-                        
-                         Spacer(modifier = Modifier.height(16.dp))
-                        
-                        Text(
-                            stringResource(R.string.developed_by_sameera),
-                            style = MaterialTheme.typography.bodySmall,
-                            textAlign = TextAlign.Center,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(32.dp))
         }
     }
+
 
     if (showClearDialog) {
         AlertDialog(
