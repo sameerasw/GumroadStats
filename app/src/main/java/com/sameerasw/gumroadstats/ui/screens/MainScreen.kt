@@ -9,8 +9,11 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AttachMoney
+import androidx.compose.material.icons.filled.Inventory
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.ShoppingCart
+import com.sameerasw.gumroadstats.viewmodel.ProductsViewModel
+import com.sameerasw.gumroadstats.ui.screens.ProductsScreen
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingToolbarDefaults
@@ -37,6 +40,8 @@ import com.sameerasw.gumroadstats.ui.components.AirSyncFloatingToolbar
 import com.sameerasw.gumroadstats.ui.model.AirSyncTab
 import com.sameerasw.gumroadstats.utils.HapticUtil
 import com.sameerasw.gumroadstats.viewmodel.PayoutsViewModel
+import androidx.compose.ui.res.stringResource
+import com.sameerasw.gumroadstats.R
 import com.sameerasw.gumroadstats.viewmodel.SalesViewModel
 import kotlinx.coroutines.launch
 
@@ -45,17 +50,28 @@ import kotlinx.coroutines.launch
 fun MainScreen(
     payoutsViewModel: PayoutsViewModel,
     salesViewModel: SalesViewModel,
+    productsViewModel: ProductsViewModel,
     onNavigateToSettings: () -> Unit
 ) {
-    val pagerState = rememberPagerState(pageCount = { 2 })
-    val scope = rememberCoroutineScope()
     val haptic = LocalHapticFeedback.current
-    val scrollBehavior = FloatingToolbarDefaults.exitAlwaysScrollBehavior(exitDirection = FloatingToolbarExitDirection.Bottom)
-
-    val tabs = listOf(
-        AirSyncTab("Payouts", Icons.Default.AttachMoney, 0),
-        AirSyncTab("Sales", Icons.Default.ShoppingCart, 1)
+    val pagerState = rememberPagerState(pageCount = { 3 })
+    val scope = rememberCoroutineScope()
+    
+    val tabPayouts = stringResource(R.string.tab_payouts)
+    val tabSales = stringResource(R.string.tab_sales)
+    val tabInventory = stringResource(R.string.tab_inventory)
+    
+    val scrollBehavior = FloatingToolbarDefaults.exitAlwaysScrollBehavior(
+        exitDirection = FloatingToolbarExitDirection.Bottom
     )
+
+    val tabs = remember(tabPayouts, tabSales, tabInventory) {
+        listOf(
+            AirSyncTab(tabPayouts, Icons.Default.AttachMoney, 0),
+            AirSyncTab(tabSales, Icons.Default.ShoppingCart, 1),
+            AirSyncTab(tabInventory, Icons.Default.Inventory, 2)
+        )
+    }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -64,8 +80,14 @@ fun MainScreen(
         topBar = {
             @OptIn(ExperimentalMaterial3Api::class)
             TopAppBar(
-                title = { 
-                    Text(if (pagerState.currentPage == 0) "Gumroad Payouts" else "Sales") 
+                title = {
+                    Text(
+                        when (pagerState.currentPage) {
+                            0 -> stringResource(R.string.tab_payouts)
+                            1 -> stringResource(R.string.tab_sales)
+                            else -> stringResource(R.string.tab_inventory)
+                        }
+                    )
                 },
                 actions = {
                     IconButton(onClick = {
@@ -74,7 +96,7 @@ fun MainScreen(
                     }) {
                         Icon(
                             imageVector = Icons.Default.Settings,
-                            contentDescription = "Settings"
+                            contentDescription = stringResource(R.string.settings)
                         )
                     }
                 }
@@ -102,6 +124,11 @@ fun MainScreen(
                         onNavigateToSettings = onNavigateToSettings,
                         modifier = Modifier.fillMaxSize()
                     )
+                    2 -> ProductsScreen(
+                        viewModel = productsViewModel,
+                        onNavigateToSettings = onNavigateToSettings,
+                        modifier = Modifier.fillMaxSize()
+                    )
                 }
             }
 
@@ -121,7 +148,7 @@ fun MainScreen(
             )
         }
     }
-    
+
     // Haptic feedback on page change
     LaunchedEffect(pagerState.currentPage) {
         HapticUtil.performLightTick(haptic)

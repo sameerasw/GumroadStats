@@ -66,6 +66,7 @@ dependencies {
     implementation(libs.gson)
     implementation(libs.material3)
     implementation(libs.material)
+    implementation(libs.coil.compose)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

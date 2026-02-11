@@ -5,6 +5,8 @@ import com.sameerasw.gumroadstats.data.api.RetrofitClient
 import com.sameerasw.gumroadstats.data.model.ErrorResponse
 import com.sameerasw.gumroadstats.data.model.Payout
 import com.sameerasw.gumroadstats.data.model.PayoutsResponse
+import com.sameerasw.gumroadstats.data.model.Product
+import com.sameerasw.gumroadstats.data.model.ProductsResponse
 import com.sameerasw.gumroadstats.data.model.User
 import com.sameerasw.gumroadstats.data.model.Sale
 import com.sameerasw.gumroadstats.data.model.SalesResponse
@@ -99,7 +101,7 @@ class GumroadRepository {
         // And the return type of apiService.getSales is SalesResponse.
         return try {
             val response = apiService.getSales(accessToken, after, before, productId, email, orderId, pageKey)
-            Result.success(response) 
+            Result.success(response)
             // Type mismatch if I use PayoutsResponse. I need to make sure I use SalesResponse.
         } catch (e: Exception) {
             Result.failure(Exception(parseErrorMessage(e)))
@@ -113,6 +115,65 @@ class GumroadRepository {
         return try {
             val response = apiService.getSaleDetails(saleId, accessToken)
             Result.success(response.sale)
+        } catch (e: Exception) {
+            Result.failure(Exception(parseErrorMessage(e)))
+        }
+    }
+
+    suspend fun getProducts(
+        accessToken: String
+    ): Result<ProductsResponse> {
+        return try {
+            val response = apiService.getProducts(accessToken)
+            Result.success(response)
+        } catch (e: Exception) {
+            Result.failure(Exception(parseErrorMessage(e)))
+        }
+    }
+
+    suspend fun getProductDetails(
+        productId: String,
+        accessToken: String
+    ): Result<Product> {
+        return try {
+            val response = apiService.getProductDetails(productId, accessToken)
+            Result.success(response.product)
+        } catch (e: Exception) {
+            Result.failure(Exception(parseErrorMessage(e)))
+        }
+    }
+
+    suspend fun deleteProduct(
+        productId: String,
+        accessToken: String
+    ): Result<String> {
+        return try {
+            val response = apiService.deleteProduct(productId, accessToken)
+            Result.success(response.message)
+        } catch (e: Exception) {
+            Result.failure(Exception(parseErrorMessage(e)))
+        }
+    }
+
+    suspend fun enableProduct(
+        productId: String,
+        accessToken: String
+    ): Result<Product> {
+        return try {
+            val response = apiService.enableProduct(productId, accessToken)
+            Result.success(response.product)
+        } catch (e: Exception) {
+            Result.failure(Exception(parseErrorMessage(e)))
+        }
+    }
+
+    suspend fun disableProduct(
+        productId: String,
+        accessToken: String
+    ): Result<Product> {
+        return try {
+            val response = apiService.disableProduct(productId, accessToken)
+            Result.success(response.product)
         } catch (e: Exception) {
             Result.failure(Exception(parseErrorMessage(e)))
         }

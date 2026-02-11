@@ -20,6 +20,7 @@ import com.sameerasw.gumroadstats.ui.components.RoundedCardContainer
 import com.sameerasw.gumroadstats.R
 import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.clickable
+import androidx.compose.ui.res.stringResource
 
 /**
  * Bottom sheet that displays detailed information about a payout
@@ -60,8 +61,6 @@ fun PayoutDetailsSheet(
             }
         }
 
-        HorizontalDivider()
-
         when (detailsState) {
             is PayoutDetailsState.Loading -> {
                 Box(
@@ -76,7 +75,7 @@ fun PayoutDetailsSheet(
                     ) {
                         CircularProgressIndicator()
                         Text(
-                            text = "Loading payout details...",
+                            text = stringResource(R.string.loading_payout_details),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -94,7 +93,7 @@ fun PayoutDetailsSheet(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "Error: ${detailsState.message}",
+                        text = stringResource(R.string.error_message, detailsState.message),
                         color = MaterialTheme.colorScheme.error,
                         style = MaterialTheme.typography.bodyMedium
                     )
@@ -129,7 +128,7 @@ private fun PayoutDetailsContent(payout: Payout) {
             ) {
                 Column {
                     Text(
-                        text = "Amount",
+                        text = stringResource(R.string.amount),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

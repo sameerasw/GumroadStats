@@ -33,7 +33,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.sameerasw.gumroadstats.R
 import com.sameerasw.gumroadstats.ui.components.cards.SaleCard
 import com.sameerasw.gumroadstats.ui.components.sheets.SaleDetailsSheet
 import com.sameerasw.gumroadstats.viewmodel.SaleDetailsState
@@ -128,7 +130,7 @@ fun SalesScreen(
                         ) {
                              item {
                                  Text(
-                                     text = "History",
+                                     text = stringResource(R.string.history),
                                      style = MaterialTheme.typography.titleMedium,
                                      modifier = Modifier.padding(start = 4.dp, top = 16.dp, bottom = 8.dp)
                                  )

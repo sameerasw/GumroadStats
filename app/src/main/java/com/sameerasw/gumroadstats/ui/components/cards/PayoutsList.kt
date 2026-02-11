@@ -16,7 +16,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.sameerasw.gumroadstats.R
 import com.sameerasw.gumroadstats.data.model.Payout
 import com.sameerasw.gumroadstats.data.model.User
 
@@ -34,7 +36,7 @@ fun PayoutsList(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            Text("No payouts found")
+            Text(stringResource(R.string.no_payouts_found))
         }
     } else {
         // Separate payable payout (if exists) from the rest
@@ -102,8 +104,9 @@ fun PayoutsList(
                                 val currencyIndex = page - payableCardCount
                                 val currencyEntry = totalCollectedByCurrency.entries.elementAtOrNull(currencyIndex)
 
-                                currencyEntry?.let { (currency, totalAndCount) ->
-                                    val (total, count) = totalAndCount
+                                currencyEntry?.let { entry ->
+                                    val currency = entry.key
+                                    val (total, count) = entry.value
                                     TotalCollectedCard(
                                         totalAmount = total,
                                         currency = currency,
@@ -130,7 +133,7 @@ fun PayoutsList(
             if (historyPayouts.isNotEmpty()) {
                 item(key = "history_header") {
                     Text(
-                        text = "History",
+                        text = stringResource(R.string.history),
                         style = MaterialTheme.typography.titleMedium,
                         modifier = Modifier.padding(start = 20.dp, top = 16.dp, bottom = 8.dp)
                     )
@@ -138,8 +141,8 @@ fun PayoutsList(
 
                 itemsIndexed(
                     items = historyPayouts,
-                    key = { _, payout -> payout.id ?: payout.createdAt }
-                ) { index, payout ->
+                    key = { _, payout -> (payout as Payout).id ?: payout.createdAt }
+                ) { index: Int, payout: Payout ->
                     val isFirst = index == 0
                     val isLast = index == historyPayouts.size - 1
 

@@ -5,7 +5,12 @@ import com.sameerasw.gumroadstats.data.model.PayoutsResponse
 import com.sameerasw.gumroadstats.data.model.UserResponse
 import com.sameerasw.gumroadstats.data.model.SalesResponse
 import com.sameerasw.gumroadstats.data.model.SaleDetailsResponse
+import com.sameerasw.gumroadstats.data.model.ProductsResponse
+import com.sameerasw.gumroadstats.data.model.ProductDetailResponse
+import com.sameerasw.gumroadstats.data.model.ProductDeleteResponse
+import retrofit2.http.DELETE
 import retrofit2.http.GET
+import retrofit2.http.PUT
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -46,4 +51,33 @@ interface GumroadApiService {
         @Path("id") saleId: String,
         @Query("access_token") accessToken: String
     ): SaleDetailsResponse
+
+    @GET("v2/products")
+    suspend fun getProducts(
+        @Query("access_token") accessToken: String
+    ): ProductsResponse
+
+    @GET("v2/products/{id}")
+    suspend fun getProductDetails(
+        @Path("id") productId: String,
+        @Query("access_token") accessToken: String
+    ): ProductDetailResponse
+
+    @DELETE("v2/products/{id}")
+    suspend fun deleteProduct(
+        @Path("id") productId: String,
+        @Query("access_token") accessToken: String
+    ): ProductDeleteResponse
+
+    @PUT("v2/products/{id}/enable")
+    suspend fun enableProduct(
+        @Path("id") productId: String,
+        @Query("access_token") accessToken: String
+    ): ProductDetailResponse
+
+    @PUT("v2/products/{id}/disable")
+    suspend fun disableProduct(
+        @Path("id") productId: String,
+        @Query("access_token") accessToken: String
+    ): ProductDetailResponse
 }

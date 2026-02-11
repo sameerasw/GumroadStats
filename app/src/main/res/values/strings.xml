@@ -1,4 +1,101 @@
 <resources>
     <string name="app_name">Gumroad Stats</string>
     <string name="widget_description">View your Gumroad payouts at a glance</string>
+
+    <!-- Navigation -->
+    <string name="tab_payouts">Payouts</string>
+    <string name="tab_sales">Sales</string>
+    <string name="tab_inventory">Inventory</string>
+    <string name="settings">Settings</string>
+
+    <!-- Common -->
+    <string name="retry">Retry</string>
+    <string name="cancel">Cancel</string>
+    <string name="ok">OK</string>
+    <string name="delete">Delete</string>
+    <string name="history">History</string>
+    <string name="confirm">Confirm</string>
+    <string name="actions">Actions</string>
+
+    <!-- Products -->
+    <string name="inventory_title">Inventory</string>
+    <string name="no_products_found">No products found</string>
+    <string name="product_details">Product Details</string>
+    <string name="published">Published</string>
+    <string name="hidden">Hidden</string>
+    <string name="sales_count_format">%1$s sales</string>
+    <string name="delete_product_title">Delete Product?</string>
+    <string name="delete_product_message">Are you sure you want to permanently delete this product? This action cannot be undone.</string>
+    <string name="disable_product">Disable Product</string>
+    <string name="enable_product">Enable Product</string>
+    <string name="hide_from_store">Hide from store</string>
+    <string name="make_visible_in_store">Make visible in store</string>
+    <string name="permanently_remove_this_product">Permanently remove this product</string>
+    <string name="product_name">Name</string>
+    <string name="product_price">Price</string>
+    <string name="product_currency">Currency</string>
+    <string name="product_short_url">Short URL</string>
+    <string name="total_sales">Total Sales</string>
+    <string name="total_revenue">Total Revenue</string>
+    <string name="description">Description</string>
+    <string name="tags">Tags</string>
+
+    <!-- Sales -->
+    <string name="sale_details">Sale Details</string>
+    <string name="sale_product">Product</string>
+    <string name="sale_amount">Amount</string>
+    <string name="sale_customer_email">Customer Email</string>
+    <string name="sale_date">Date</string>
+    <string name="sale_order_id">Order ID</string>
+    <string name="sale_gumroad_fee">Gumroad Fee</string>
+    <string name="sale_status_refunded">Refunded</string>
+    <string name="no_sales_found">No sales data found</string>
+
+    <!-- Payouts -->
+    <string name="payout_details">Payout Details</string>
+    <string name="payout_amount">Amount</string>
+    <string name="payout_date">Payout Date</string>
+    <string name="payout_status">Status</string>
+    <string name="payout_destination">Destination</string>
+    <string name="upcoming_payouts">Upcoming Payouts</string>
+    <string name="payout_history">Payout History</string>
+    <string name="loading_payout_details">Loading payout details…</string>
+    <string name="error_message">Error: %1$s</string>
+    <string name="amount">Amount</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="back">Back</string>
+    <string name="update_interval">Update Interval</string>
+    <string name="update_interval_description_never">Payouts will only refresh manually</string>
+    <string name="update_interval_description_format">Payouts will automatically refresh every %1$s</string>
+    <string name="start_date">Start Date</string>
+    <string name="all_time">All time</string>
+    <string name="clear_date">Clear Date</string>
+    <string name="fetch_payouts_starting_from">Fetch payouts starting from this date</string>
+    <string name="clear_access_token">Clear Access Token</string>
+    <string name="remove_saved_token_and_cached_data">Remove saved token and cached data</string>
+    <string name="about_section">About Section</string>
+    <string name="developer_avatar">Developer Avatar</string>
+    <string name="made_with_love_by_sameera">Made with ❤️ by Sameera</string>
+    <string name="version_format">Version %1$s</string>
+    <string name="app_description">Track your Gumroad payouts and sales data directly from your Android device.</string>
+    <string name="view_on_github">View on GitHub</string>
+    <string name="visit_my_website">Visit My Website</string>
+    <string name="developed_by_sameera">Developed by Sameera Wijerathna</string>
+    <string name="clear_access_token_title">Clear Access Token?</string>
+    <string name="clear_access_token_message">This will remove your saved access token and cached data. You\'ll need to enter it again next time.</string>
+    <string name="clear">Clear</string>
+    <string name="unknown">Unknown</string>
+
+    <!-- Payouts Screen -->
+    <string name="welcome_title">Welcome to Gumroad Stats</string>
+    <string name="enter_access_token">Enter your Gumroad Access Token</string>
+    <string name="access_token_label">Access Token</string>
+    <string name="save_and_load_payouts">Save and Load Payouts</string>
+    <string name="token_generation_help">You can generate your access token from your Gumroad application settings with \'view_payouts\' scope</string>
+    <string name="no_payouts_found">No payouts found</string>
+
+
+
 </resources>

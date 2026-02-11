@@ -20,6 +20,7 @@ import com.sameerasw.gumroadstats.ui.screens.PayoutsScreen
 import com.sameerasw.gumroadstats.ui.theme.GumroadStatsTheme
 import com.sameerasw.gumroadstats.viewmodel.PayoutsViewModel
 import com.sameerasw.gumroadstats.viewmodel.SalesViewModel
+import com.sameerasw.gumroadstats.viewmodel.ProductsViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -69,9 +70,19 @@ class MainActivity : ComponentActivity() {
                         }
                     )
 
+                    val productsViewModel: ProductsViewModel = viewModel(
+                        factory = object : ViewModelProvider.Factory {
+                            @Suppress("UNCHECKED_CAST")
+                            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                                return ProductsViewModel(application) as T
+                            }
+                        }
+                    )
+
                     MainScreen(
                         payoutsViewModel = payoutsViewModel,
                         salesViewModel = salesViewModel,
+                        productsViewModel = productsViewModel,
                         onNavigateToSettings = {
                             startActivity(Intent(this@MainActivity, SettingsActivity::class.java))
                         }

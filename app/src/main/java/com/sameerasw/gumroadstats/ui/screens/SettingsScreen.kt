@@ -25,6 +25,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
+import androidx.compose.ui.res.stringResource
 import com.sameerasw.gumroadstats.R
 import com.sameerasw.gumroadstats.data.preferences.UpdateInterval
 import com.sameerasw.gumroadstats.ui.components.RoundedCardContainer
@@ -65,7 +66,7 @@ fun SettingsScreen(
                         showDatePicker = false
                     }
                 ) {
-                    Text("OK")
+                    Text(stringResource(R.string.ok))
                 }
             },
             dismissButton = {
@@ -75,7 +76,7 @@ fun SettingsScreen(
                         showDatePicker = false
                     }
                 ) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.cancel))
                 }
             }
         ) {
@@ -88,13 +89,13 @@ fun SettingsScreen(
             .getPackageInfo(context.packageName, 0)
             .versionName
     } catch (_: Exception) {
-        "Unknown"
+        stringResource(R.string.unknown)
     }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Settings") },
+                title = { Text(stringResource(R.string.settings_title)) },
                 navigationIcon = {
                     IconButton(onClick = {
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -102,7 +103,7 @@ fun SettingsScreen(
                     }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = stringResource(R.string.back)
                         )
                     }
                 }
@@ -130,7 +131,7 @@ fun SettingsScreen(
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text(
-                            text = "Update Interval",
+                            text = stringResource(R.string.update_interval),
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.padding(bottom = 8.dp)
@@ -169,9 +170,9 @@ fun SettingsScreen(
 
                         Text(
                             text = if (currentInterval == UpdateInterval.NEVER) {
-                                "Payouts will only refresh manually"
+                                stringResource(R.string.update_interval_description_never)
                             } else {
-                                "Payouts will automatically refresh every ${currentInterval.displayName}"
+                                stringResource(R.string.update_interval_description_format, currentInterval.displayName)
                             },
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -187,14 +188,14 @@ fun SettingsScreen(
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text(
-                            text = "Start Date",
+                            text = stringResource(R.string.start_date),
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.padding(bottom = 8.dp)
                         )
 
                         val dateText = remember(startDate) {
-                            if (startDate == null) "All time"
+                            if (startDate == null) context.getString(R.string.all_time)
                             else java.text.SimpleDateFormat("MMM dd, yyyy", java.util.Locale.getDefault()).format(java.util.Date(startDate))
                         }
 
@@ -216,12 +217,12 @@ fun SettingsScreen(
                                 },
                                 modifier = Modifier.align(Alignment.End)
                             ) {
-                                Text("Clear Date")
+                                Text(stringResource(R.string.clear_date))
                             }
                         }
 
                         Text(
-                            text = "Fetch payouts starting from this date",
+                            text = stringResource(R.string.fetch_payouts_starting_from),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(top = 0.dp)
@@ -254,12 +255,12 @@ fun SettingsScreen(
                         ) {
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
-                                    text = "Clear Access Token",
+                                    text = stringResource(R.string.clear_access_token),
                                     style = MaterialTheme.typography.titleMedium,
                                     color = MaterialTheme.colorScheme.onErrorContainer
                                 )
                                 Text(
-                                    text = "Remove saved token and cached data",
+                                    text = stringResource(R.string.remove_saved_token_and_cached_data),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.7f)
                                 )
@@ -277,7 +278,6 @@ fun SettingsScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             // About Section
-            // About Section
             RoundedCardContainer {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
@@ -293,7 +293,7 @@ fun SettingsScreen(
                     ) {
                         Image(
                             painter = painterResource(id = R.drawable.avatar),
-                            contentDescription = "Developer Avatar",
+                            contentDescription = stringResource(R.string.developer_avatar),
                             modifier = Modifier
                                 .size(80.dp)
                                 .clip(CircleShape)
@@ -301,10 +301,11 @@ fun SettingsScreen(
                                     detectTapGestures(
                                         onLongPress = {
                                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                            val message = context.getString(R.string.made_with_love_by_sameera)
                                             Toast
                                                 .makeText(
                                                     context,
-                                                    "Made with ❤️ by Sameera",
+                                                    message,
                                                     Toast.LENGTH_SHORT
                                                 )
                                                 .show()
@@ -316,13 +317,13 @@ fun SettingsScreen(
                         Spacer(modifier = Modifier.height(16.dp))
 
                         Text(
-                            text = "GumroadStats",
+                            text = stringResource(R.string.app_name),
                             style = MaterialTheme.typography.headlineSmall,
                             textAlign = TextAlign.Center
                         )
                         
                         Text(
-                            text = "Version $versionName",
+                            text = stringResource(R.string.version_format, versionName ?: ""),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -330,7 +331,7 @@ fun SettingsScreen(
                         Spacer(modifier = Modifier.height(16.dp))
 
                         Text(
-                            text = "Track your Gumroad payouts and sales data directly from your Android device.",
+                            text = stringResource(R.string.app_description),
                             style = MaterialTheme.typography.bodyMedium,
                             textAlign = TextAlign.Center,
                             modifier = Modifier.padding(horizontal = 8.dp)
@@ -347,7 +348,7 @@ fun SettingsScreen(
                             },
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Text("View on GitHub")
+                            Text(stringResource(R.string.view_on_github))
                         }
 
                         Spacer(modifier = Modifier.height(8.dp))
@@ -361,13 +362,13 @@ fun SettingsScreen(
                             },
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Text("Visit My Website")
+                            Text(stringResource(R.string.visit_my_website))
                         }
                         
                          Spacer(modifier = Modifier.height(16.dp))
                         
                         Text(
-                            "Developed by Sameera Wijerathna",
+                            stringResource(R.string.developed_by_sameera),
                             style = MaterialTheme.typography.bodySmall,
                             textAlign = TextAlign.Center,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -386,8 +387,8 @@ fun SettingsScreen(
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 showClearDialog = false
             },
-            title = { Text("Clear Access Token?") },
-            text = { Text("This will remove your saved access token and cached data. You'll need to enter it again next time.") },
+            title = { Text(stringResource(R.string.clear_access_token_title)) },
+            text = { Text(stringResource(R.string.clear_access_token_message)) },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -397,7 +398,7 @@ fun SettingsScreen(
                         onNavigateBack()
                     }
                 ) {
-                    Text("Clear", color = MaterialTheme.colorScheme.error)
+                    Text(stringResource(R.string.clear), color = MaterialTheme.colorScheme.error)
                 }
             },
             dismissButton = {
@@ -405,7 +406,7 @@ fun SettingsScreen(
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                     showClearDialog = false
                 }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.cancel))
                 }
             }
         )

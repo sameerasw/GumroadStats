@@ -23,6 +23,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.sameerasw.gumroadstats.data.model.Sale
 import com.sameerasw.gumroadstats.ui.components.RoundedCardContainer
+import androidx.compose.ui.res.stringResource
+import com.sameerasw.gumroadstats.R
 import com.sameerasw.gumroadstats.utils.formatDate
 import com.sameerasw.gumroadstats.viewmodel.SaleDetailsState
 
@@ -39,7 +41,7 @@ fun SaleDetailsSheet(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "Sale Details",
+            text = stringResource(R.string.sale_details),
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(vertical = 16.dp)
@@ -84,46 +86,46 @@ private fun SaleDetailsContent(sale: Sale) {
     ) {
         // Product Details
         DetailCard(
-            title = "Product",
+            title = stringResource(R.string.sale_product),
             value = sale.productName
         )
         
         // Amount Details
         DetailCard(
-            title = "Amount",
+            title = stringResource(R.string.sale_amount),
             value = sale.formattedTotalPrice,
             valueColor = MaterialTheme.colorScheme.primary
         )
 
         // Customer Details
         DetailCard(
-            title = "Customer Email",
+            title = stringResource(R.string.sale_customer_email),
             value = sale.email
         )
 
         // Date Details
         DetailCard(
-            title = "Date",
+            title = stringResource(R.string.sale_date),
             value = formatDate(sale.createdAt, is24Hour)
         )
         
         // Order ID if available
         DetailCard(
-            title = "Order ID",
+            title = stringResource(R.string.sale_order_id),
             value = sale.orderId.toString()
         )
         
         // Gumroad Fee
         DetailCard(
-            title = "Gumroad Fee",
+            title = stringResource(R.string.sale_gumroad_fee),
             value = "${sale.gumroadFee} cents" // Could format this better if currency symbol logic was robust
         )
         
         // Refunded Status
         if (sale.refunded) {
              DetailCard(
-                title = "Status",
-                value = "Refunded",
+                title = stringResource(R.string.payout_status),
+                value = stringResource(R.string.sale_status_refunded),
                 valueColor = MaterialTheme.colorScheme.error
             )
         }

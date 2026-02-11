@@ -12,9 +12,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import com.sameerasw.gumroadstats.R
 import com.sameerasw.gumroadstats.ui.components.cards.PayoutsList
 import com.sameerasw.gumroadstats.ui.components.sheets.PayoutDetailsSheet
 import com.sameerasw.gumroadstats.viewmodel.PayoutDetailsState
@@ -131,7 +133,7 @@ fun PayoutsScreen(
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                 viewModel.loadPayouts()
                             }) {
-                                Text("Retry")
+                                Text(stringResource(R.string.retry))
                             }
                         }
                     }
@@ -187,12 +189,12 @@ private fun AccessTokenInputScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "Welcome to Gumroad Stats",
+            text = stringResource(R.string.welcome_title),
             style = MaterialTheme.typography.headlineMedium,
             modifier = Modifier.padding(bottom = 8.dp)
         )
         Text(
-            text = "Enter your Gumroad Access Token",
+            text = stringResource(R.string.enter_access_token),
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.padding(bottom = 16.dp)
         )
@@ -200,7 +202,7 @@ private fun AccessTokenInputScreen(
         OutlinedTextField(
             value = tokenInput,
             onValueChange = onTokenInputChange,
-            label = { Text("Access Token") },
+            label = { Text(stringResource(R.string.access_token_label)) },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 16.dp),
@@ -222,11 +224,11 @@ private fun AccessTokenInputScreen(
             onClick = onSaveToken,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Save and Load Payouts")
+            Text(stringResource(R.string.save_and_load_payouts))
         }
 
         Text(
-            text = "You can generate your access token from your Gumroad application settings with 'view_payouts' scope",
+            text = stringResource(R.string.token_generation_help),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(top = 8.dp)
