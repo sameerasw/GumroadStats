@@ -91,7 +91,10 @@ class PayoutsRemoteViewsFactory(
         )
         views.setTextViewText(
             R.id.payout_date,
-            formatDate(payout.createdAt)
+            formatDate(
+                payout.createdAt,
+                android.text.format.DateFormat.is24HourFormat(context)
+            )
         )
 
         // Set status icon based on status type

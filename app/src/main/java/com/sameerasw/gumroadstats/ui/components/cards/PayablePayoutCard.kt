@@ -38,7 +38,7 @@ fun PayablePayoutCard(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         shape = RoundedCornerShape(24.dp)
     ) {
         Column(
@@ -82,7 +82,10 @@ fun PayablePayoutCard(
                         )
                         Spacer(modifier = Modifier.height(2.dp))
                         Text(
-                            text = formatDate(payout.createdAt),
+                            text = formatDate(
+                                payout.createdAt,
+                                android.text.format.DateFormat.is24HourFormat(androidx.compose.ui.platform.LocalContext.current)
+                            ),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
                         )

@@ -16,6 +16,10 @@ import com.sameerasw.gumroadstats.ui.components.common.StatusChip
 import com.sameerasw.gumroadstats.utils.formatAmount
 import com.sameerasw.gumroadstats.utils.formatDate
 import com.sameerasw.gumroadstats.viewmodel.PayoutDetailsState
+import com.sameerasw.gumroadstats.ui.components.RoundedCardContainer
+import com.sameerasw.gumroadstats.R
+import androidx.compose.ui.res.painterResource
+import androidx.compose.foundation.clickable
 
 /**
  * Bottom sheet that displays detailed information about a payout
@@ -103,58 +107,93 @@ fun PayoutDetailsSheet(
 
 @Composable
 private fun PayoutDetailsContent(payout: Payout) {
-    Column(
+    RoundedCardContainer(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(24.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+            .padding(horizontal = 16.dp),
+        spacing = 2.dp
     ) {
         // Amount and Status
-        Row(
+        Card(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+            shape = MaterialTheme.shapes.extraSmall,
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHighest),
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
         ) {
-            Column {
-                Text(
-                    text = "Amount",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Text(
-                    text = "${formatAmount(payout.amount)} ${payout.currency.uppercase()}",
-                    style = MaterialTheme.typography.headlineMedium,
-                    color = MaterialTheme.colorScheme.primary
-                )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    Text(
+                        text = "Amount",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        text = "${formatAmount(payout.amount)} ${payout.currency.uppercase()}",
+                        style = MaterialTheme.typography.headlineMedium,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+                StatusChip(status = payout.status)
             }
-            StatusChip(status = payout.status)
         }
-
-        HorizontalDivider()
 
         // Payment Details
-        DetailRow(label = "Payment Processor", value = payout.paymentProcessor.uppercase())
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = MaterialTheme.shapes.extraSmall,
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHighest),
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                DetailRow(label = "Payment Processor", value = payout.paymentProcessor.uppercase())
 
-        if (payout.bankAccountVisual != null) {
-            DetailRow(label = "Bank Account", value = payout.bankAccountVisual)
+                if (payout.bankAccountVisual != null) {
+                    DetailRow(label = "Bank Account", value = payout.bankAccountVisual)
+                }
+
+                if (payout.paypalEmail != null) {
+                    DetailRow(label = "PayPal Email", value = payout.paypalEmail)
+                }
+            }
         }
 
-        if (payout.paypalEmail != null) {
-            DetailRow(label = "PayPal Email", value = payout.paypalEmail)
-        }
+        // Dates & ID
+        Card(
+             modifier = Modifier.fillMaxWidth(),
+            shape = MaterialTheme.shapes.extraSmall,
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHighest),
+            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                val context = androidx.compose.ui.platform.LocalContext.current
+                val is24Hour = android.text.format.DateFormat.is24HourFormat(context)
+                
+                DetailRow(label = "Created", value = formatDate(payout.createdAt, is24Hour))
 
-        HorizontalDivider()
+                if (payout.processedAt != null) {
+                    DetailRow(label = "Processed", value = formatDate(payout.processedAt, is24Hour))
+                }
 
-        // Dates
-        DetailRow(label = "Created", value = formatDate(payout.createdAt))
-
-        if (payout.processedAt != null) {
-            DetailRow(label = "Processed", value = formatDate(payout.processedAt))
-        }
-
-        if (payout.id != null) {
-            HorizontalDivider()
-            DetailRow(label = "Payout ID", value = payout.id)
+                if (payout.id != null) {
+                    DetailRow(label = "Payout ID", value = payout.id)
+                }
+            }
         }
     }
 }

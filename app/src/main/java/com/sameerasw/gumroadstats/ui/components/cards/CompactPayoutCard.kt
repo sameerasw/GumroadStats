@@ -48,7 +48,7 @@ fun CompactPayoutCard(
         modifier = modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
-        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
         shape = shape
     ) {
         Row(
@@ -68,7 +68,10 @@ fun CompactPayoutCard(
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = formatDate(payout.createdAt),
+                    text = formatDate(
+                        payout.createdAt,
+                        android.text.format.DateFormat.is24HourFormat(androidx.compose.ui.platform.LocalContext.current)
+                    ),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

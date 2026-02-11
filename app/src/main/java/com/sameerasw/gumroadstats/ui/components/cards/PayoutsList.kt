@@ -71,7 +71,7 @@ fun PayoutsList(
                 top = 8.dp,
                 bottom = 16.dp
             ),
-            verticalArrangement = Arrangement.spacedBy(3.dp)
+            verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
             // Horizontal pager for cards at top
             item(key = "cards_carousel") {
