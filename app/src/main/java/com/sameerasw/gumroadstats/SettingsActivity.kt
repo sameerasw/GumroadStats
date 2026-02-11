@@ -59,10 +59,14 @@ class SettingsActivity : ComponentActivity() {
                     )
 
                     val updateInterval by viewModel.updateInterval.collectAsState()
+                    val startDate by viewModel.startDate.collectAsState()
 
                     SettingsScreen(
                         currentInterval = updateInterval,
+                        startDate = startDate,
                         onIntervalChange = { viewModel.setUpdateInterval(it) },
+                        onStartDateChange = { viewModel.setStartDate(it) },
+                        onClearStartDate = { viewModel.clearStartDate() },
                         onClearToken = { viewModel.clearAccessToken() },
                         onNavigateBack = { finish() }
                     )

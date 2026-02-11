@@ -16,6 +16,7 @@ class PreferencesManager(private val context: Context) {
     companion object {
         private val ACCESS_TOKEN_KEY = stringPreferencesKey("access_token")
         private val UPDATE_INTERVAL_KEY = longPreferencesKey("update_interval_minutes")
+        private val START_DATE_KEY = longPreferencesKey("start_date_millis")
     }
 
     val accessToken: Flow<String> = context.dataStore.data.map { preferences ->
@@ -25,6 +26,10 @@ class PreferencesManager(private val context: Context) {
     val updateInterval: Flow<UpdateInterval> = context.dataStore.data.map { preferences ->
         val minutes = preferences[UPDATE_INTERVAL_KEY]
         UpdateInterval.fromMinutes(minutes)
+    }
+
+    val startDate: Flow<Long?> = context.dataStore.data.map { preferences ->
+        preferences[START_DATE_KEY]
     }
 
     suspend fun saveAccessToken(token: String) {
@@ -43,9 +48,22 @@ class PreferencesManager(private val context: Context) {
         }
     }
 
+    suspend fun saveStartDate(date: Long) {
+        context.dataStore.edit { preferences ->
+            preferences[START_DATE_KEY] = date
+        }
+    }
+
+    suspend fun clearStartDate() {
+        context.dataStore.edit { preferences ->
+            preferences.remove(START_DATE_KEY)
+        }
+    }
+
     suspend fun clearAccessToken() {
         context.dataStore.edit { preferences ->
             preferences.remove(ACCESS_TOKEN_KEY)
+            preferences.remove(START_DATE_KEY)
         }
     }
 }

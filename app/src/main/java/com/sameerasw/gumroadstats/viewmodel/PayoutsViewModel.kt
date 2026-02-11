@@ -61,6 +61,10 @@ class PayoutsViewModel(private val context: Context) : ViewModel() {
     private val _updateInterval = MutableStateFlow(UpdateInterval.NEVER)
     val updateInterval: StateFlow<UpdateInterval> = _updateInterval.asStateFlow()
 
+    private val _startDate = MutableStateFlow<Long?>(null)
+    val startDate: StateFlow<Long?> = _startDate.asStateFlow()
+
+    private var loadPayoutsJob: Job? = null
     private var autoUpdateJob: Job? = null
 
     init {
@@ -95,6 +99,15 @@ class PayoutsViewModel(private val context: Context) : ViewModel() {
                 setupAutoUpdate(interval)
             }
         }
+
+        viewModelScope.launch {
+            preferencesManager.startDate.collect { date ->
+                _startDate.value = date
+                if (_accessToken.value.isNotEmpty()) {
+                    loadPayouts(silent = false)
+                }
+            }
+        }
     }
 
     fun setAccessToken(token: String) {
@@ -106,6 +119,18 @@ class PayoutsViewModel(private val context: Context) : ViewModel() {
     fun setUpdateInterval(interval: UpdateInterval) {
         viewModelScope.launch {
             preferencesManager.saveUpdateInterval(interval)
+        }
+    }
+
+    fun setStartDate(date: Long) {
+        viewModelScope.launch {
+            preferencesManager.saveStartDate(date)
+        }
+    }
+
+    fun clearStartDate() {
+        viewModelScope.launch {
+            preferencesManager.clearStartDate()
         }
     }
 
@@ -135,36 +160,51 @@ class PayoutsViewModel(private val context: Context) : ViewModel() {
     }
 
     fun loadPayouts(silent: Boolean = false) {
+        loadPayoutsJob?.cancel()
+
         if (_accessToken.value.isEmpty()) {
             _uiState.value = PayoutsUiState.Error("Please enter your access token")
             return
         }
 
-        viewModelScope.launch {
+        loadPayoutsJob = viewModelScope.launch {
             try {
                 if (!silent) {
                     _uiState.value = PayoutsUiState.Loading
                 }
-                val result = repository.getPayouts(_accessToken.value)
-                result.fold(
-                    onSuccess = { response ->
-                        // Save to cache
-                        payoutsCache.savePayouts(response.payouts)
-                        _uiState.value = PayoutsUiState.Success(response.payouts, isOfflineData = false)
 
-                        // Update widgets when data changes
-                        WidgetUpdateHelper.updateAllWidgets(context)
-                    },
-                    onFailure = { error ->
-                        // If we have cached data, show it with offline indicator
-                        val cached = payoutsCache.cachedPayouts.first()
-                        if (cached.isNotEmpty()) {
-                            _uiState.value = PayoutsUiState.Success(cached, isOfflineData = true)
-                        } else {
-                            _uiState.value = PayoutsUiState.Error(error.message ?: "Unknown error occurred")
+                val allPayouts = mutableListOf<Payout>()
+                var nextPageKey: String? = null
+                val dateFormatter = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US)
+                val afterDate = _startDate.value?.let { dateFormatter.format(java.util.Date(it)) }
+
+                do {
+                    val result = repository.getPayouts(
+                        accessToken = _accessToken.value,
+                        after = afterDate,
+                        pageKey = nextPageKey
+                    )
+                    
+                    var shouldContinue = false
+                    result.fold(
+                        onSuccess = { response ->
+                            allPayouts.addAll(response.payouts)
+                            nextPageKey = response.nextPageKey
+                            shouldContinue = nextPageKey != null
+                        },
+                        onFailure = { error ->
+                            throw error
                         }
-                    }
-                )
+                    )
+                } while (shouldContinue)
+                
+                // Save to cache
+                payoutsCache.savePayouts(allPayouts)
+                _uiState.value = PayoutsUiState.Success(allPayouts, isOfflineData = false)
+
+                // Update widgets when data changes
+                WidgetUpdateHelper.updateAllWidgets(context)
+
             } catch (e: Exception) {
                 // Ensure we always update the UI state even if something unexpected happens
                 val cached = payoutsCache.cachedPayouts.first()

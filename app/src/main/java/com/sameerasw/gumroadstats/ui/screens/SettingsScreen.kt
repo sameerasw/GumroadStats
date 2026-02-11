@@ -32,16 +32,55 @@ import com.sameerasw.gumroadstats.data.preferences.UpdateInterval
 @Composable
 fun SettingsScreen(
     currentInterval: UpdateInterval,
+    startDate: Long?,
     onIntervalChange: (UpdateInterval) -> Unit,
+    onStartDateChange: (Long) -> Unit,
+    onClearStartDate: () -> Unit,
     onClearToken: () -> Unit,
     onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     var showClearDialog by remember { mutableStateOf(false) }
     var showIntervalMenu by remember { mutableStateOf(false) }
+    var showDatePicker by remember { mutableStateOf(false) }
+    
     val haptic = LocalHapticFeedback.current
     val context = LocalContext.current
     val scrollState = rememberScrollState()
+
+    val datePickerState = rememberDatePickerState(
+        initialSelectedDateMillis = startDate ?: System.currentTimeMillis(),
+        initialDisplayMode = DisplayMode.Picker
+    )
+
+    if (showDatePicker) {
+        DatePickerDialog(
+            onDismissRequest = { showDatePicker = false },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        datePickerState.selectedDateMillis?.let { onStartDateChange(it) }
+                        showDatePicker = false
+                    }
+                ) {
+                    Text("OK")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        showDatePicker = false
+                    }
+                ) {
+                    Text("Cancel")
+                }
+            }
+        ) {
+            DatePicker(state = datePickerState)
+        }
+    }
 
     val versionName = try {
         context.packageManager
@@ -139,6 +178,61 @@ fun SettingsScreen(
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(top = 8.dp)
+                    )
+                }
+            }
+
+            Text(
+                text = "Data Settings",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 24.dp)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = "Start Date",
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+
+                    val dateText = remember(startDate) {
+                        if (startDate == null) "All time"
+                        else java.text.SimpleDateFormat("MMM dd, yyyy", java.util.Locale.getDefault()).format(java.util.Date(startDate))
+                    }
+
+                    OutlinedButton(
+                        onClick = {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            showDatePicker = true
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(dateText)
+                    }
+
+                    if (startDate != null) {
+                        TextButton(
+                            onClick = {
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                onClearStartDate()
+                            },
+                            modifier = Modifier.align(Alignment.End)
+                        ) {
+                            Text("Clear Date")
+                        }
+                    }
+
+                    Text(
+                        text = "Fetch payouts starting from this date",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        Modifier.padding(top = 0.dp)
                     )
                 }
             }
