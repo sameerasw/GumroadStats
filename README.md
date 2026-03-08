@@ -5,18 +5,6 @@ An Android app to track and monitor your Gumroad payouts directly from your devi
 ![Frame 6 Large](https://github.com/user-attachments/assets/e1efe5ee-c7be-425c-a08d-70b31b307d88)
 
 
-
-## Features
-
-- View all your Gumroad payouts in a clean, modern interface
-- Display payout amounts, currency, and status
-- Show payment processor details (Stripe/PayPal)
-- Display creation and processing dates
-- Secure access token storage with DataStore
-- Auto-refresh with configurable intervals
-- Home screen widget for quick payout overview
-- Material 3 design with dark mode support
-
 ## Setup
 
 1. **Get your Gumroad Access Token:**
@@ -30,30 +18,6 @@ An Android app to track and monitor your Gumroad payouts directly from your devi
    - Build and run the app
    - Enter your access token when prompted
    - Your payouts will load automatically
-
-## Architecture
-
-Built with modern Android development practices following MVVM architecture:
-
-### Data Layer
-- **Models**: Payout data classes for API responses
-- **API Service**: Retrofit interface for Gumroad API
-- **Repository**: Data operations and caching
-- **Preferences**: DataStore for secure token storage
-
-### UI Layer
-- **ViewModel**: State management and business logic
-- **Screens**: Jetpack Compose UI components
-- **Widget**: Home screen widget for quick access
-
-### Libraries
-- Retrofit - REST API client
-- Gson - JSON serialization
-- OkHttp - HTTP client with logging
-- Jetpack Compose - Modern declarative UI
-- Material 3 - Latest Material Design
-- DataStore - Preferences storage
-- Kotlin Coroutines - Asynchronous operations
 
 ## Payout Status Types
 
@@ -76,15 +40,4 @@ Access tokens are securely stored using DataStore and persisted across app sessi
 ## Requirements
 
 - Android 13 (API 33) or higher
-- Kotlin 2.0+
-- Internet connection
 
-## Developer
-
-Developed by Sameera Wijerathna
-
-Website: [sameerasw.com](https://www.sameerasw.com)
-
-## License
-
-Open source and available for personal use.
