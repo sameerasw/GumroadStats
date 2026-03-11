@@ -9,7 +9,10 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 kotlin {
     compilerOptions {
         jvmTarget.set(JvmTarget.JVM_11)
-        freeCompilerArgs.add("-Xannotation-default-target=param-property")
+        freeCompilerArgs.addAll(
+            "-P",
+            "plugin:androidx.compose.compiler.plugins.kotlin:suppressKotlinVersionCompatibilityCheck=true"
+        )
     }
 }
 
@@ -31,16 +34,16 @@ android {
 
 //        optimized dev build
 
-          debug {
-             isMinifyEnabled = true
-             isShrinkResources = true
-             isDebuggable = false
-
-             proguardFiles(
-                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                 "proguard-rules.pro"
-             )
-          }
+//          debug {
+//             isMinifyEnabled = true
+//             isShrinkResources = true
+//             isDebuggable = false
+//
+//             proguardFiles(
+//                 getDefaultProguardFile("proguard-android-optimize.txt"),
+//                 "proguard-rules.pro"
+//             )
+//          }
 
         // end
 

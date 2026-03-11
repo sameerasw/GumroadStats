@@ -61,8 +61,8 @@ fun ProductsScreen(
                             state = listState,
                             modifier = Modifier.fillMaxSize(),
                             contentPadding = PaddingValues(
-                                top = 16.dp,
-                                bottom = 100.dp,
+                                top = WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 16.dp,
+                                bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 100.dp,
                                 start = 16.dp,
                                 end = 16.dp
                             ),

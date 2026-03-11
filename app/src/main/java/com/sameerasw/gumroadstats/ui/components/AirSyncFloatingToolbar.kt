@@ -3,9 +3,13 @@ package com.sameerasw.gumroadstats.ui.components
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingToolbarDefaults
@@ -36,58 +40,30 @@ fun AirSyncFloatingToolbar(
     currentPage: Int,
     tabs: List<AirSyncTab>,
     onTabSelected: (Int) -> Unit,
-    scrollBehavior: FloatingToolbarScrollBehavior
+    scrollBehavior: FloatingToolbarScrollBehavior,
+    floatingActionButton: (@Composable () -> Unit)? = null
 ) {
-    var interactionCount by remember { mutableStateOf(0) }
-
-    // Track which tab was just selected for bump animation
-    var bumpingTab by remember { mutableIntStateOf(-1) }
-    var bumpKey by remember { mutableIntStateOf(0) }
-
-    // Reset bump animation after delay
-    LaunchedEffect(bumpKey) {
-        if (bumpingTab >= 0) {
-            delay(200)
-            bumpingTab = -1
-        }
-    }
-
     HorizontalFloatingToolbar(
-        modifier = modifier,
-        expanded = false, // Set to false to wrap content and center via parent alignment
+        modifier = modifier
+            .windowInsetsPadding(WindowInsets.navigationBars)
+            .padding(horizontal = 16.dp),
+        expanded = true,
+        floatingActionButton = floatingActionButton ?: {},
         scrollBehavior = scrollBehavior,
         colors = FloatingToolbarDefaults.vibrantFloatingToolbarColors(
-            toolbarContentColor = MaterialTheme.colorScheme.onPrimary,
-            toolbarContainerColor = MaterialTheme.colorScheme.primary
+            toolbarContentColor = MaterialTheme.colorScheme.onSurface,
+            toolbarContainerColor = MaterialTheme.colorScheme.primary,
         ),
         content = {
-            // FIXED ORDER LOOP to prevent shifting
             tabs.forEachIndexed { index, tab ->
                 val isSelected = currentPage == index
 
-                // Animate alpha for smooth fade
-                val itemAlpha = 1f
-
-                // Animate width for spacing
-                val itemWidth = 48.dp
-
-                // Animate spacer width
-                val spacerWidth = if (index < tabs.size - 1) 16.dp else 0.dp
-
-                // Always render the button
                 IconButton(
                     onClick = {
-                        interactionCount++
                         onTabSelected(index)
                     },
                     modifier = Modifier
-                        .width(itemWidth)
-                        .height(48.dp)
-                        .graphicsLayer {
-                            scaleX = 1f
-                            scaleY = 1f
-                            alpha = itemAlpha
-                        },
+                        .size(48.dp),
                     colors = if (isSelected) {
                         IconButtonDefaults.filledIconButtonColors(
                             contentColor = MaterialTheme.colorScheme.primary,
@@ -109,7 +85,7 @@ fun AirSyncFloatingToolbar(
 
                 // Spacing between buttons
                 if (index < tabs.size - 1) {
-                    Spacer(modifier = Modifier.width(spacerWidth))
+                    Spacer(modifier = Modifier.width(8.dp))
                 }
             }
         }

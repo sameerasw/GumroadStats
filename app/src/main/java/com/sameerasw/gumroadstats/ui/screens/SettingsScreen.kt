@@ -30,7 +30,15 @@ import com.sameerasw.gumroadstats.R
 import com.sameerasw.gumroadstats.data.preferences.UpdateInterval
 import com.sameerasw.gumroadstats.ui.components.RoundedCardContainer
 
-@OptIn(ExperimentalMaterial3Api::class)
+import com.sameerasw.gumroadstats.ui.components.AboutSection
+import com.sameerasw.gumroadstats.ui.components.AirSyncFloatingToolbar
+import androidx.compose.material3.FloatingToolbarDefaults
+import androidx.compose.material3.FloatingToolbarExitDirection
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.zIndex
+import com.sameerasw.gumroadstats.utils.HapticUtil
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun SettingsScreen(
     currentInterval: UpdateInterval,
@@ -84,201 +92,208 @@ fun SettingsScreen(
         }
     }
 
-    val versionName = try {
-        context.packageManager
-            .getPackageInfo(context.packageName, 0)
-            .versionName
-    } catch (_: Exception) {
-        stringResource(R.string.unknown)
-    }
-
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.settings_title)) },
-                navigationIcon = {
-                    IconButton(onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        onNavigateBack()
-                    }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.back)
-                        )
-                    }
-                }
-            )
-        },
+        topBar = { },
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         modifier = modifier
     ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .verticalScroll(scrollState)
-                .padding(horizontal = 16.dp)
-        ) {
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Auto-Update Settings
-            RoundedCardContainer {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = MaterialTheme.shapes.extraSmall,
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHighest),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+        Box(modifier = Modifier.fillMaxSize()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(scrollState)
+                    .padding(horizontal = 16.dp)
+            ) {
+                Spacer(modifier = Modifier.windowInsetsPadding(WindowInsets.statusBars))
+                
+                IconButton(
+                    onClick = {
+                        HapticUtil.performClick(haptic)
+                        onNavigateBack()
+                    },
+                    modifier = Modifier.padding(bottom = 8.dp)
                 ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text(
-                            text = stringResource(R.string.update_interval),
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier.padding(bottom = 8.dp)
-                        )
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = stringResource(R.string.back)
+                    )
+                }
 
-                        Box {
+                Text(
+                    text = stringResource(R.string.settings_title),
+                    style = MaterialTheme.typography.headlineLarge,
+                    modifier = Modifier.padding(bottom = 24.dp)
+                )
+
+                // Auto-Update Settings
+                RoundedCardContainer {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = MaterialTheme.shapes.extraSmall,
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHighest),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Text(
+                                text = stringResource(R.string.update_interval),
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.padding(bottom = 8.dp)
+                            )
+
+                            Box {
+                                OutlinedButton(
+                                    onClick = {
+                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        showIntervalMenu = true
+                                    },
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Text(currentInterval.displayName)
+                                }
+
+                                DropdownMenu(
+                                    expanded = showIntervalMenu,
+                                    onDismissRequest = { showIntervalMenu = false }
+                                ) {
+                                    UpdateInterval.entries.forEach { interval ->
+                                        DropdownMenuItem(
+                                            text = { Text(interval.displayName) },
+                                            onClick = {
+                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                onIntervalChange(interval)
+                                                showIntervalMenu = false
+                                            },
+                                            leadingIcon = if (interval == currentInterval) {
+                                                { Icon(Icons.Default.Check, contentDescription = null) }
+                                            } else null
+                                        )
+                                    }
+                                }
+                            }
+
+                            Text(
+                                text = if (currentInterval == UpdateInterval.NEVER) {
+                                    stringResource(R.string.update_interval_description_never)
+                                } else {
+                                    stringResource(R.string.update_interval_description_format, currentInterval.displayName)
+                                },
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(top = 8.dp)
+                            )
+                        }
+                    }
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = MaterialTheme.shapes.extraSmall,
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHighest),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Text(
+                                text = stringResource(R.string.start_date),
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.padding(bottom = 8.dp)
+                            )
+
+                            val dateText = remember(startDate) {
+                                if (startDate == null) context.getString(R.string.all_time)
+                                else java.text.SimpleDateFormat("MMM dd, yyyy", java.util.Locale.getDefault()).format(java.util.Date(startDate))
+                            }
+
                             OutlinedButton(
                                 onClick = {
                                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    showIntervalMenu = true
+                                    showDatePicker = true
                                 },
                                 modifier = Modifier.fillMaxWidth()
                             ) {
-                                Text(currentInterval.displayName)
+                                Text(dateText)
                             }
 
-                            DropdownMenu(
-                                expanded = showIntervalMenu,
-                                onDismissRequest = { showIntervalMenu = false }
-                            ) {
-                                UpdateInterval.entries.forEach { interval ->
-                                    DropdownMenuItem(
-                                        text = { Text(interval.displayName) },
-                                        onClick = {
-                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                            onIntervalChange(interval)
-                                            showIntervalMenu = false
-                                        },
-                                        leadingIcon = if (interval == currentInterval) {
-                                            { Icon(Icons.Default.Check, contentDescription = null) }
-                                        } else null
-                                    )
+                            if (startDate != null) {
+                                TextButton(
+                                    onClick = {
+                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        onClearStartDate()
+                                    },
+                                    modifier = Modifier.align(Alignment.End)
+                                ) {
+                                    Text(stringResource(R.string.clear_date))
                                 }
                             }
-                        }
 
-                        Text(
-                            text = if (currentInterval == UpdateInterval.NEVER) {
-                                stringResource(R.string.update_interval_description_never)
-                            } else {
-                                stringResource(R.string.update_interval_description_format, currentInterval.displayName)
-                            },
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(top = 8.dp)
-                        )
+                            Text(
+                                text = stringResource(R.string.fetch_payouts_starting_from),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.padding(top = 0.dp)
+                            )
+                        }
                     }
                 }
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = MaterialTheme.shapes.extraSmall,
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHighest),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text(
-                            text = stringResource(R.string.start_date),
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier.padding(bottom = 8.dp)
-                        )
 
-                        val dateText = remember(startDate) {
-                            if (startDate == null) context.getString(R.string.all_time)
-                            else java.text.SimpleDateFormat("MMM dd, yyyy", java.util.Locale.getDefault()).format(java.util.Date(startDate))
-                        }
-
-                        OutlinedButton(
-                            onClick = {
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                // Account Settings
+                RoundedCardContainer {
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                showDatePicker = true
+                                showClearDialog = true
                             },
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Text(dateText)
-                        }
-
-                        if (startDate != null) {
-                            TextButton(
-                                onClick = {
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    onClearStartDate()
-                                },
-                                modifier = Modifier.align(Alignment.End)
+                        shape = MaterialTheme.shapes.extraSmall,
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                             Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text(stringResource(R.string.clear_date))
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = stringResource(R.string.clear_access_token),
+                                        style = MaterialTheme.typography.titleMedium,
+                                        color = MaterialTheme.colorScheme.onErrorContainer
+                                    )
+                                    Text(
+                                        text = stringResource(R.string.remove_saved_token_and_cached_data),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.7f)
+                                    )
+                                }
+                                 Icon(
+                                     painter = painterResource(id = R.drawable.rounded_expand_circle_right_24),
+                                     contentDescription = null,
+                                     tint = MaterialTheme.colorScheme.onErrorContainer
+                                 )
                             }
-                        }
-
-                        Text(
-                            text = stringResource(R.string.fetch_payouts_starting_from),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(top = 0.dp)
-                        )
-                    }
-                }
-            }
-
-
-            Spacer(modifier = Modifier.height(16.dp))
-            
-            // Account Settings
-            RoundedCardContainer {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable {
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            showClearDialog = true
-                        },
-                    shape = MaterialTheme.shapes.extraSmall,
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                         Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = stringResource(R.string.clear_access_token),
-                                    style = MaterialTheme.typography.titleMedium,
-                                    color = MaterialTheme.colorScheme.onErrorContainer
-                                )
-                                Text(
-                                    text = stringResource(R.string.remove_saved_token_and_cached_data),
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.7f)
-                                )
-                            }
-                             Icon(
-                                 painter = painterResource(id = R.drawable.rounded_expand_circle_right_24),
-                                 contentDescription = null,
-                                 tint = MaterialTheme.colorScheme.onErrorContainer
-                             )
                         }
                     }
                 }
-            }
 
-            Spacer(modifier = Modifier.height(32.dp))
+                Spacer(modifier = Modifier.height(32.dp))
+
+                AboutSection(
+                    appName = stringResource(R.string.app_name),
+                    description = stringResource(R.string.app_description),
+                    onAvatarLongClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        Toast.makeText(context, "Developer options coming soon!", Toast.LENGTH_SHORT).show()
+                    }
+                )
+
+                Spacer(modifier = Modifier.windowInsetsPadding(WindowInsets.navigationBars))
+                Spacer(modifier = Modifier.height(32.dp))
+            }
         }
     }
-
 
     if (showClearDialog) {
         AlertDialog(

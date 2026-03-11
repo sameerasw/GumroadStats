@@ -1,11 +1,4 @@
-package com.sameerasw.gumroadstats.ui.components.cards
-
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.pager.HorizontalPager
@@ -16,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.sameerasw.gumroadstats.R
@@ -67,11 +61,14 @@ fun PayoutsList(
                 }
         }
 
+        val topPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 16.dp
+        val bottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 100.dp
+
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(
-                top = 8.dp,
-                bottom = 100.dp
+                top = topPadding,
+                bottom = bottomPadding
             ),
             verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {

@@ -22,26 +22,17 @@ import com.sameerasw.gumroadstats.viewmodel.PayoutsViewModel
 import com.sameerasw.gumroadstats.viewmodel.SalesViewModel
 import com.sameerasw.gumroadstats.viewmodel.ProductsViewModel
 
+import androidx.core.view.WindowCompat
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         // Install splash screen before super.onCreate()
-        installSplashScreen()
+        val splashScreen = installSplashScreen()
 
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
 
-        // Enable full edge-to-edge drawing for both status and navigation bars
-        enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.auto(
-                android.graphics.Color.TRANSPARENT,
-                android.graphics.Color.TRANSPARENT
-            ),
-            navigationBarStyle = SystemBarStyle.auto(
-                android.graphics.Color.TRANSPARENT,
-                android.graphics.Color.TRANSPARENT
-            )
-        )
-
-        // On Android 10+ disable forced high-contrast nav bar, so app can draw beneath gesture bar
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             window.isNavigationBarContrastEnforced = false
         }

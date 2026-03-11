@@ -19,24 +19,16 @@ import com.sameerasw.gumroadstats.ui.screens.SettingsScreen
 import com.sameerasw.gumroadstats.ui.theme.GumroadStatsTheme
 import com.sameerasw.gumroadstats.viewmodel.PayoutsViewModel
 
+import androidx.core.view.WindowCompat
+
 /**
  * Separate activity for Settings screen with proper back navigation
  */
 class SettingsActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         super.onCreate(savedInstanceState)
-
-        // Enable full edge-to-edge drawing for both status and navigation bars
-        enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.auto(
-                android.graphics.Color.TRANSPARENT,
-                android.graphics.Color.TRANSPARENT
-            ),
-            navigationBarStyle = SystemBarStyle.auto(
-                android.graphics.Color.TRANSPARENT,
-                android.graphics.Color.TRANSPARENT
-            )
-        )
+        enableEdgeToEdge()
 
         // On Android 10+ disable forced high-contrast nav bar, so app can draw beneath gesture bar
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {

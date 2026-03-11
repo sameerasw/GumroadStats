@@ -48,6 +48,10 @@ import com.sameerasw.gumroadstats.viewmodel.SalesViewModel
 import com.sameerasw.gumroadstats.ui.components.sheets.AboutBottomSheet
 import kotlinx.coroutines.launch
 
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
+import androidx.compose.material3.MaterialTheme
+
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun MainScreen(
@@ -59,7 +63,6 @@ fun MainScreen(
     val haptic = LocalHapticFeedback.current
     val pagerState = rememberPagerState(pageCount = { 3 })
     val scope = rememberCoroutineScope()
-    var showAboutSheet by remember { mutableStateOf(false) }
     
     val tabPayouts = stringResource(R.string.tab_payouts)
     val tabSales = stringResource(R.string.tab_sales)
@@ -81,45 +84,11 @@ fun MainScreen(
         modifier = Modifier.fillMaxSize(),
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         containerColor = Color.Transparent,
-        topBar = {
-            @OptIn(ExperimentalMaterial3Api::class)
-            TopAppBar(
-                title = {
-                    Text(
-                        when (pagerState.currentPage) {
-                            0 -> stringResource(R.string.tab_payouts)
-                            1 -> stringResource(R.string.tab_sales)
-                            else -> stringResource(R.string.tab_inventory)
-                        }
-                    )
-                },
-                actions = {
-                    IconButton(onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        showAboutSheet = true
-                    }) {
-                        Icon(
-                            imageVector = Icons.Default.Info,
-                            contentDescription = stringResource(R.string.about_section)
-                        )
-                    }
-                    IconButton(onClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        onNavigateToSettings()
-                    }) {
-                        Icon(
-                            imageVector = Icons.Default.Settings,
-                            contentDescription = stringResource(R.string.settings)
-                        )
-                    }
-                }
-            )
-        }
+        topBar = { }
     ) { innerPadding ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = innerPadding.calculateTopPadding())
         ) {
             HorizontalPager(
                 state = pagerState,
@@ -148,7 +117,6 @@ fun MainScreen(
             AirSyncFloatingToolbar(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .offset(y = -12.dp)
                     .zIndex(1f),
                 currentPage = pagerState.currentPage,
                 tabs = tabs,
@@ -157,7 +125,24 @@ fun MainScreen(
                         pagerState.animateScrollToPage(index)
                     }
                 },
-                scrollBehavior = scrollBehavior
+                scrollBehavior = scrollBehavior,
+                floatingActionButton = {
+                    FloatingActionButton(
+                        onClick = {
+                            HapticUtil.performLightTick(haptic)
+                            onNavigateToSettings()
+                        },
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                        shape = MaterialTheme.shapes.large,
+                        elevation = FloatingActionButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = stringResource(R.string.settings)
+                        )
+                    }
+                }
             )
         }
     }
@@ -165,14 +150,5 @@ fun MainScreen(
     // Haptic feedback on page change
     LaunchedEffect(pagerState.currentPage) {
         HapticUtil.performLightTick(haptic)
-    }
-
-    if (showAboutSheet) {
-        AboutBottomSheet(
-            onDismissRequest = { showAboutSheet = false },
-            onToggleDeveloperMode = {
-                // Developer mode logic
-            }
-        )
     }
 }
