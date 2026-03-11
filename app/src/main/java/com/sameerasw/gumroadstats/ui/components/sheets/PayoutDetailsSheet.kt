@@ -21,6 +21,7 @@ import com.sameerasw.gumroadstats.R
 import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.clickable
 import androidx.compose.ui.res.stringResource
+import com.sameerasw.gumroadstats.ui.components.common.StatusIconChip
 
 /**
  * Bottom sheet that displays detailed information about a payout
@@ -134,15 +135,16 @@ private fun PayoutDetailsContent(payout: Payout) {
                     )
                     Text(
                         text = "${formatAmount(payout.amount)} ${payout.currency.uppercase()}",
-                        style = MaterialTheme.typography.headlineMedium,
-                        color = MaterialTheme.colorScheme.primary
+                        style = MaterialTheme.typography.displaySmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(bottom = 8.dp)
                     )
                 }
-                StatusChip(status = payout.status)
+                StatusIconChip(status = payout.status)
             }
         }
 
-        // Payment Details
+            // Payment Details
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = MaterialTheme.shapes.extraSmall,
@@ -155,14 +157,14 @@ private fun PayoutDetailsContent(payout: Payout) {
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                DetailRow(label = "Payment Processor", value = payout.paymentProcessor.uppercase())
+                DetailRow(label = stringResource(R.string.processor), value = payout.paymentProcessor)
 
                 if (payout.bankAccountVisual != null) {
-                    DetailRow(label = "Bank Account", value = payout.bankAccountVisual)
+                    DetailRow(label = stringResource(R.string.bank_account), value = payout.bankAccountVisual)
                 }
 
                 if (payout.paypalEmail != null) {
-                    DetailRow(label = "PayPal Email", value = payout.paypalEmail)
+                    DetailRow(label = stringResource(R.string.paypal_email), value = payout.paypalEmail)
                 }
             }
         }
@@ -180,17 +182,12 @@ private fun PayoutDetailsContent(payout: Payout) {
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                val context = androidx.compose.ui.platform.LocalContext.current
-                val is24Hour = android.text.format.DateFormat.is24HourFormat(context)
-                
-                DetailRow(label = "Created", value = formatDate(payout.createdAt, is24Hour))
-
+                DetailRow(label = stringResource(R.string.date), value = formatDate(payout.createdAt))
                 if (payout.processedAt != null) {
-                    DetailRow(label = "Processed", value = formatDate(payout.processedAt, is24Hour))
+                    DetailRow(label = stringResource(R.string.processed_on), value = formatDate(payout.processedAt))
                 }
-
                 if (payout.id != null) {
-                    DetailRow(label = "Payout ID", value = payout.id)
+                    DetailRow(label = stringResource(R.string.payout_id), value = payout.id)
                 }
             }
         }

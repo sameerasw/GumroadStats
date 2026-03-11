@@ -19,7 +19,8 @@ import androidx.compose.ui.unit.dp
  */
 @Composable
 fun StatusIconChip(status: String) {
-    val (icon, color) = when (status.lowercase()) {
+    val displayStatus = status
+    val (icon, color) = when (displayStatus.lowercase()) {
         "completed" -> Icons.Outlined.CheckCircle to MaterialTheme.colorScheme.primary
         "pending", "processing" -> Icons.Outlined.HourglassEmpty to MaterialTheme.colorScheme.tertiary
         "payable" -> Icons.Outlined.AttachMoney to MaterialTheme.colorScheme.secondary
@@ -34,7 +35,7 @@ fun StatusIconChip(status: String) {
     ) {
         Icon(
             imageVector = icon,
-            contentDescription = status,
+            contentDescription = displayStatus,
             tint = color,
             modifier = Modifier
                 .padding(8.dp)

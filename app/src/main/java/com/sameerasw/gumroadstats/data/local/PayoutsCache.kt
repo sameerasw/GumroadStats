@@ -18,6 +18,17 @@ class PayoutsCache(private val context: Context) {
     companion object {
         private val CACHED_PAYOUTS_KEY = stringPreferencesKey("cached_payouts")
         private val LAST_UPDATE_KEY = stringPreferencesKey("last_update_timestamp")
+
+        @Volatile
+        private var INSTANCE: PayoutsCache? = null
+
+        fun getInstance(context: Context): PayoutsCache {
+            return INSTANCE ?: synchronized(this) {
+                val instance = PayoutsCache(context.applicationContext)
+                INSTANCE = instance
+                instance
+            }
+        }
     }
 
     private val gson = Gson()
@@ -25,8 +36,8 @@ class PayoutsCache(private val context: Context) {
     val cachedPayouts: Flow<List<Payout>> = context.payoutsDataStore.data.map { preferences ->
         val json = preferences[CACHED_PAYOUTS_KEY] ?: return@map emptyList()
         try {
-            val type = object : TypeToken<List<Payout>>() {}.type
-            gson.fromJson<List<Payout>>(json, type)
+            val payoutsArray = gson.fromJson(json, Array<Payout>::class.java)
+            payoutsArray.toList()
         } catch (e: Exception) {
             emptyList()
         }
@@ -37,10 +48,22 @@ class PayoutsCache(private val context: Context) {
     }
 
     suspend fun savePayouts(payouts: List<Payout>) {
-        context.payoutsDataStore.edit { preferences ->
+        try {
             val json = gson.toJson(payouts)
-            preferences[CACHED_PAYOUTS_KEY] = json
-            preferences[LAST_UPDATE_KEY] = System.currentTimeMillis().toString()
+            
+            // Primary storage: DataStore
+            context.payoutsDataStore.edit { preferences ->
+                preferences[CACHED_PAYOUTS_KEY] = json
+                preferences[LAST_UPDATE_KEY] = System.currentTimeMillis().toString()
+            }
+            
+            context.getSharedPreferences("widget_payouts_sync", Context.MODE_PRIVATE)
+                .edit()
+                .putString("payouts_json", json)
+                .putLong("last_update", System.currentTimeMillis())
+                .apply()
+        } catch (e: Exception) {
+            // Log or handle error
         }
     }
 
@@ -49,6 +72,12 @@ class PayoutsCache(private val context: Context) {
             preferences.remove(CACHED_PAYOUTS_KEY)
             preferences.remove(LAST_UPDATE_KEY)
         }
+        
+        // Clear fallback
+        context.getSharedPreferences("widget_payouts_sync", Context.MODE_PRIVATE)
+            .edit()
+            .clear()
+            .apply()
     }
 }
 

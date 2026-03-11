@@ -13,7 +13,8 @@ import androidx.compose.ui.unit.dp
  */
 @Composable
 fun StatusChip(status: String) {
-    val color = when (status.lowercase()) {
+    val displayStatus = status
+    val color = when (displayStatus.lowercase()) {
         "completed" -> MaterialTheme.colorScheme.primary
         "pending" -> MaterialTheme.colorScheme.tertiary
         "payable" -> MaterialTheme.colorScheme.secondary
@@ -27,7 +28,7 @@ fun StatusChip(status: String) {
         modifier = Modifier.padding(4.dp)
     ) {
         Text(
-            text = status.uppercase(),
+            text = displayStatus.uppercase(),
             color = color,
             style = MaterialTheme.typography.labelMedium,
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)

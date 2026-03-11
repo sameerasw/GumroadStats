@@ -69,16 +69,13 @@ fun CompactPayoutCard(
             ) {
                 Text(
                     text = "${formatAmount(payout.amount)} ${payout.currency.uppercase()}",
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.primary
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(2.dp))
                 Text(
-                    text = formatDate(
-                        payout.createdAt,
-                        android.text.format.DateFormat.is24HourFormat(androidx.compose.ui.platform.LocalContext.current)
-                    ),
-                    style = MaterialTheme.typography.bodyMedium,
+                    text = formatDate(payout.createdAt),
+                    style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }

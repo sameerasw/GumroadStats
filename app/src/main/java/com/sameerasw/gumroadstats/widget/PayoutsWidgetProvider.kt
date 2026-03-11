@@ -71,6 +71,8 @@ class PayoutsWidgetProvider : AppWidgetProvider() {
             // Set pending intent template for list items
             views.setPendingIntentTemplate(R.id.widget_payouts_list, pendingIntent)
 
+            views.setOnClickPendingIntent(R.id.widget_empty_view, pendingIntent)
+
             // Set up the intent that starts the PayoutsRemoteViewsService
             val serviceIntent = Intent(context, PayoutsRemoteViewsService::class.java)
             serviceIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)

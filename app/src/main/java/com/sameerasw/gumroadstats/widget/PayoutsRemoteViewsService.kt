@@ -2,9 +2,12 @@ package com.sameerasw.gumroadstats.widget
 
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import android.graphics.drawable.GradientDrawable
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import com.sameerasw.gumroadstats.R
 import com.sameerasw.gumroadstats.data.local.PayoutsCache
 import com.sameerasw.gumroadstats.data.model.Payout
@@ -12,6 +15,7 @@ import com.sameerasw.gumroadstats.utils.formatAmount
 import com.sameerasw.gumroadstats.utils.formatDate
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeoutOrNull
 
 /**
  * Service that provides the factory for RemoteViews
@@ -30,7 +34,7 @@ class PayoutsRemoteViewsFactory(
 ) : RemoteViewsService.RemoteViewsFactory {
 
     private var payouts: List<Payout> = emptyList()
-    private val cache = PayoutsCache(context)
+    private val cache = PayoutsCache.getInstance(context)
 
     override fun onCreate() {
         loadPayouts()
@@ -41,23 +45,59 @@ class PayoutsRemoteViewsFactory(
     }
 
     private fun loadPayouts() {
-        runBlocking {
-            val cachedPayouts = cache.cachedPayouts.first()
-            if (cachedPayouts.isNotEmpty()) {
-                // Separate payable payout and put it first
-                val payablePayout = cachedPayouts.firstOrNull {
-                    it.status.equals("payable", ignoreCase = true)
+        try {
+            runBlocking {
+                val cachedPayouts = withTimeoutOrNull(2000) {
+                    cache.cachedPayouts.first()
                 }
-                val otherPayouts = cachedPayouts.filter {
-                    !it.status.equals("payable", ignoreCase = true)
-                }
-
-                payouts = if (payablePayout != null) {
-                    listOf(payablePayout) + otherPayouts
+                
+                if (cachedPayouts != null && cachedPayouts.isNotEmpty()) {
+                    Log.d("PayoutsWidget", "Loaded ${cachedPayouts.size} payouts from DataStore")
+                    payouts = sortPayouts(cachedPayouts)
                 } else {
-                    cachedPayouts
+                    Log.d("PayoutsWidget", "DataStore empty or timed out, trying SharedPreferences fallback")
+                    val fallbackJson = context.getSharedPreferences("widget_payouts_sync", Context.MODE_PRIVATE)
+                        .getString("payouts_json", null)
+                    
+                    if (fallbackJson != null) {
+                        try {
+                            val gson = Gson()
+                            val payoutsArray = gson.fromJson(fallbackJson, Array<Payout>::class.java)
+                            val fallbackPayouts = payoutsArray.toList()
+                            if (fallbackPayouts.isNotEmpty()) {
+                                Log.d("PayoutsWidget", "Loaded ${fallbackPayouts.size} payouts from fallback")
+                                payouts = sortPayouts(fallbackPayouts)
+                            } else {
+                                payouts = emptyList()
+                            }
+                        } catch (e: Exception) {
+                            Log.e("PayoutsWidget", "Error deserializing fallback JSON", e)
+                            payouts = emptyList()
+                        }
+                    } else {
+                        Log.w("PayoutsWidget", "No data in fallback storage either")
+                        payouts = emptyList()
+                    }
                 }
             }
+        } catch (e: Exception) {
+            Log.e("PayoutsWidget", "Error loading payouts", e)
+            payouts = emptyList()
+        }
+    }
+
+    private fun sortPayouts(list: List<Payout>): List<Payout> {
+        val payablePayout = list.firstOrNull {
+            it.status?.equals("payable", ignoreCase = true) == true
+        }
+        val otherPayouts = list.filter {
+            it.status?.equals("payable", ignoreCase = true) != true
+        }
+
+        return if (payablePayout != null) {
+            listOf(payablePayout) + otherPayouts
+        } else {
+            list
         }
     }
 
@@ -85,20 +125,12 @@ class PayoutsRemoteViewsFactory(
         val views = RemoteViews(context.packageName, layoutId)
 
         // Set the data
-        views.setTextViewText(
-            R.id.payout_amount,
-            "${formatAmount(payout.amount)} ${payout.currency.uppercase()}"
-        )
-        views.setTextViewText(
-            R.id.payout_date,
-            formatDate(
-                payout.createdAt,
-                android.text.format.DateFormat.is24HourFormat(context)
-            )
-        )
+        views.setTextViewText(R.id.payout_amount, "${formatAmount(payout.amount)} ${payout.currency.uppercase()}")
+        views.setTextViewText(R.id.payout_date, formatDate(payout.createdAt))
 
         // Set status icon based on status type
-        val statusIcon = when (payout.status.lowercase()) {
+        val status = payout.status
+        val statusIcon = when (status.lowercase()) {
             "completed" -> R.drawable.ic_status_completed
             "pending", "processing" -> R.drawable.ic_status_pending
             "payable" -> R.drawable.ic_status_payable

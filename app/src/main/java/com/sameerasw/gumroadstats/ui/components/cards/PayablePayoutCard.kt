@@ -77,16 +77,13 @@ fun PayablePayoutCard(
                     ) {
                         Text(
                             text = "${formatAmount(payout.amount)} ${payout.currency.uppercase()}",
-                            style = MaterialTheme.typography.headlineMedium,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer,
+                            style = MaterialTheme.typography.displaySmall,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
                         )
-                        Spacer(modifier = Modifier.height(2.dp))
+                        Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = formatDate(
-                                payout.createdAt,
-                                android.text.format.DateFormat.is24HourFormat(androidx.compose.ui.platform.LocalContext.current)
-                            ),
-                            style = MaterialTheme.typography.bodySmall,
+                            text = "Expected ${formatDate(payout.createdAt)}",
+                            style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
                         )
                     }

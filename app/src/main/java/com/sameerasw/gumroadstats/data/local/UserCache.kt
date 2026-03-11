@@ -17,6 +17,17 @@ class UserCache(private val context: Context) {
     companion object {
         private val CACHED_USER_KEY = stringPreferencesKey("cached_user")
         private val LAST_UPDATE_KEY = stringPreferencesKey("last_update_timestamp")
+
+        @Volatile
+        private var INSTANCE: UserCache? = null
+
+        fun getInstance(context: Context): UserCache {
+            return INSTANCE ?: synchronized(this) {
+                val instance = UserCache(context.applicationContext)
+                INSTANCE = instance
+                instance
+            }
+        }
     }
 
     private val gson = Gson()

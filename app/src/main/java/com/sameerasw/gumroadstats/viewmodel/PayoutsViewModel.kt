@@ -43,8 +43,8 @@ sealed class UserState {
 class PayoutsViewModel(private val context: Context) : ViewModel() {
     private val repository = GumroadRepository()
     private val preferencesManager = PreferencesManager(context)
-    private val payoutsCache = PayoutsCache(context)
-    private val userCache = UserCache(context)
+    private val payoutsCache = PayoutsCache.getInstance(context)
+    private val userCache = UserCache.getInstance(context)
 
     private val _uiState = MutableStateFlow<PayoutsUiState>(PayoutsUiState.Initial)
     val uiState: StateFlow<PayoutsUiState> = _uiState.asStateFlow()
@@ -105,8 +105,10 @@ class PayoutsViewModel(private val context: Context) : ViewModel() {
 
         viewModelScope.launch {
             preferencesManager.startDate.collect { date ->
+                val oldDate = _startDate.value
                 _startDate.value = date
-                if (_accessToken.value.isNotEmpty()) {
+                // Only reload if the date actually changed and we have a token
+                if (_accessToken.value.isNotEmpty() && oldDate != null && oldDate != date) {
                     loadPayouts(silent = false)
                 }
             }
