@@ -67,6 +67,9 @@ class PayoutsViewModel(private val context: Context) : ViewModel() {
     private val _groupByMonth = MutableStateFlow(false)
     val groupByMonth: StateFlow<Boolean> = _groupByMonth.asStateFlow()
 
+    private val _isBiometricLockEnabled = MutableStateFlow(false)
+    val isBiometricLockEnabled: StateFlow<Boolean> = _isBiometricLockEnabled.asStateFlow()
+
     private var loadPayoutsJob: Job? = null
     private var autoUpdateJob: Job? = null
 
@@ -119,6 +122,12 @@ class PayoutsViewModel(private val context: Context) : ViewModel() {
                 _groupByMonth.value = enabled
             }
         }
+
+        viewModelScope.launch {
+            preferencesManager.isBiometricLockEnabled.collect { enabled ->
+                _isBiometricLockEnabled.value = enabled
+            }
+        }
     }
 
     fun setAccessToken(token: String) {
@@ -148,6 +157,12 @@ class PayoutsViewModel(private val context: Context) : ViewModel() {
     fun setGroupByMonth(enabled: Boolean) {
         viewModelScope.launch {
             preferencesManager.saveGroupByMonth(enabled)
+        }
+    }
+
+    fun setBiometricLockEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            preferencesManager.saveBiometricLockEnabled(enabled)
         }
     }
 

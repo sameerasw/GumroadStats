@@ -19,6 +19,7 @@ class PreferencesManager(private val context: Context) {
         private val UPDATE_INTERVAL_KEY = longPreferencesKey("update_interval_minutes")
         private val START_DATE_KEY = longPreferencesKey("start_date_millis")
         private val GROUP_BY_MONTH_KEY = booleanPreferencesKey("group_by_month")
+        private val BIOMETRIC_LOCK_ENABLED_KEY = booleanPreferencesKey("biometric_lock_enabled")
     }
 
     val accessToken: Flow<String> = context.dataStore.data.map { preferences ->
@@ -36,6 +37,10 @@ class PreferencesManager(private val context: Context) {
 
     val groupByMonth: Flow<Boolean> = context.dataStore.data.map { preferences ->
         preferences[GROUP_BY_MONTH_KEY] ?: false
+    }
+
+    val isBiometricLockEnabled: Flow<Boolean> = context.dataStore.data.map { preferences ->
+        preferences[BIOMETRIC_LOCK_ENABLED_KEY] ?: false
     }
 
     suspend fun saveAccessToken(token: String) {
@@ -57,6 +62,12 @@ class PreferencesManager(private val context: Context) {
     suspend fun saveGroupByMonth(enabled: Boolean) {
         context.dataStore.edit { preferences ->
             preferences[GROUP_BY_MONTH_KEY] = enabled
+        }
+    }
+
+    suspend fun saveBiometricLockEnabled(enabled: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[BIOMETRIC_LOCK_ENABLED_KEY] = enabled
         }
     }
 

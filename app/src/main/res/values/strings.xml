@@ -120,5 +120,9 @@
     <string name="group_by_month">Group by month</string>
     <string name="group_by_month_description">Group payouts by month and show summary</string>
     <string name="monthly_summary">Monthly Summary</string>
+    <string name="biometric_lock">Biometric lock</string>
+    <string name="biometric_lock_description">Require fingerprint or face unlock to open the app</string>
+    <string name="authenticate_to_unlock">Please Authenticate to Unlock</string>
+    <string name="unlock">Unlock</string>
 
 </resources>

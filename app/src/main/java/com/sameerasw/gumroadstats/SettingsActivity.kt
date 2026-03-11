@@ -2,10 +2,10 @@ package com.sameerasw.gumroadstats
 
 import android.os.Build
 import android.os.Bundle
-import androidx.activity.ComponentActivity
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.fragment.app.FragmentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.SystemBarStyle
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -24,7 +24,7 @@ import androidx.core.view.WindowCompat
 /**
  * Separate activity for Settings screen with proper back navigation
  */
-class SettingsActivity : ComponentActivity() {
+class SettingsActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         super.onCreate(savedInstanceState)
@@ -53,14 +53,17 @@ class SettingsActivity : ComponentActivity() {
                     val updateInterval by viewModel.updateInterval.collectAsState()
                     val startDate by viewModel.startDate.collectAsState()
                     val groupByMonth by viewModel.groupByMonth.collectAsState()
+                    val isBiometricLockEnabled by viewModel.isBiometricLockEnabled.collectAsState()
 
                     SettingsScreen(
                         currentInterval = updateInterval,
                         startDate = startDate,
                         groupByMonth = groupByMonth,
+                        isBiometricLockEnabled = isBiometricLockEnabled,
                         onIntervalChange = { viewModel.setUpdateInterval(it) },
                         onStartDateChange = { viewModel.setStartDate(it) },
                         onGroupByMonthChange = { viewModel.setGroupByMonth(it) },
+                        onBiometricLockChange = { viewModel.setBiometricLockEnabled(it) },
                         onClearStartDate = { viewModel.clearStartDate() },
                         onClearToken = { viewModel.clearAccessToken() },
                         onNavigateBack = { finish() }
