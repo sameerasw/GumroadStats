@@ -12,7 +12,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -28,6 +29,7 @@ import com.sameerasw.gumroadstats.R
 import com.sameerasw.gumroadstats.utils.formatDate
 import com.sameerasw.gumroadstats.viewmodel.SaleDetailsState
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun SaleDetailsSheet(
     detailsState: SaleDetailsState,
@@ -55,7 +57,7 @@ fun SaleDetailsSheet(
                         .padding(32.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator()
+                    LoadingIndicator()
                 }
             }
             is SaleDetailsState.Error -> {

@@ -25,7 +25,7 @@ import androidx.compose.ui.res.stringResource
 /**
  * Bottom sheet that displays detailed information about a payout
  */
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun PayoutDetailsSheet(
     detailsState: PayoutDetailsState,
@@ -73,7 +73,7 @@ fun PayoutDetailsSheet(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        CircularProgressIndicator()
+                        LoadingIndicator()
                         Text(
                             text = stringResource(R.string.loading_payout_details),
                             style = MaterialTheme.typography.bodyMedium,

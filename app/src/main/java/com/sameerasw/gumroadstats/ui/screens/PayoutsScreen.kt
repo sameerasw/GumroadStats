@@ -26,7 +26,7 @@ import kotlinx.coroutines.delay
 /**
  * Main screen for displaying Gumroad payouts
  */
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun PayoutsScreen(
     viewModel: PayoutsViewModel,
@@ -86,7 +86,7 @@ fun PayoutsScreen(
                             modifier = Modifier.fillMaxSize(),
                             contentAlignment = Alignment.Center
                         ) {
-                            CircularProgressIndicator()
+                            LoadingIndicator()
                         }
                     }
                     is PayoutsUiState.Success -> {
@@ -143,7 +143,7 @@ fun PayoutsScreen(
                             modifier = Modifier.fillMaxSize(),
                             contentAlignment = Alignment.Center
                         ) {
-                            CircularProgressIndicator()
+                            LoadingIndicator()
                         }
                     }
                 }

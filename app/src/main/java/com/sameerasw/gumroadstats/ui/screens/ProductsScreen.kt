@@ -19,7 +19,7 @@ import com.sameerasw.gumroadstats.ui.components.sheets.ProductDetailsSheet
 import com.sameerasw.gumroadstats.viewmodel.ProductsUiState
 import com.sameerasw.gumroadstats.viewmodel.ProductsViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun ProductsScreen(
     viewModel: ProductsViewModel,
@@ -41,7 +41,7 @@ fun ProductsScreen(
             when (val state = uiState) {
                 is ProductsUiState.Loading -> {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator()
+                        LoadingIndicator()
                     }
                 }
                 is ProductsUiState.Error -> {

@@ -20,6 +20,7 @@ import com.sameerasw.gumroadstats.data.model.Product
 import com.sameerasw.gumroadstats.ui.components.RoundedCardContainer
 import com.sameerasw.gumroadstats.viewmodel.ProductDetailsState
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun ProductDetailsSheet(
     detailsState: ProductDetailsState,
@@ -52,7 +53,7 @@ fun ProductDetailsSheet(
                         .padding(32.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator()
+                    LoadingIndicator()
                 }
             }
             is ProductDetailsState.Error -> {

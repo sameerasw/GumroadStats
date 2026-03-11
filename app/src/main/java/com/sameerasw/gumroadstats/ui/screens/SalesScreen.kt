@@ -23,7 +23,7 @@ import com.sameerasw.gumroadstats.viewmodel.SalesUiState
 import com.sameerasw.gumroadstats.viewmodel.SalesViewModel
 import kotlinx.coroutines.delay
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun SalesScreen(
     viewModel: SalesViewModel,
@@ -82,7 +82,7 @@ fun SalesScreen(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
-                        CircularProgressIndicator()
+                        LoadingIndicator()
                     }
                 }
                 is SalesUiState.Success -> {
@@ -111,13 +111,6 @@ fun SalesScreen(
                             ),
                             verticalArrangement = Arrangement.spacedBy(2.dp) // Consistent with PayoutsList
                         ) {
-                             item {
-                                 Text(
-                                     text = stringResource(R.string.history),
-                                     style = MaterialTheme.typography.titleMedium,
-                                     modifier = Modifier.padding(start = 4.dp, top = 16.dp, bottom = 8.dp)
-                                 )
-                             }
 
                              itemsIndexed(state.sales) { index, sale ->
                                  val isFirst = index == 0
@@ -142,7 +135,7 @@ fun SalesScreen(
                                              .padding(16.dp),
                                          contentAlignment = Alignment.Center
                                      ) {
-                                         CircularProgressIndicator()
+                                         LoadingIndicator()
                                      }
                                  }
                              }
@@ -173,7 +166,7 @@ fun SalesScreen(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
-                        CircularProgressIndicator()
+                        LoadingIndicator()
                     }
                 }
             }
