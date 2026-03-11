@@ -89,6 +89,8 @@ dependencies {
 
     // Splash Screen
     implementation("androidx.core:core-splashscreen:1.0.1")
+    implementation(libs.androidx.biometric)
+    implementation(libs.androidx.fragment.ktx)
 
     // DataStore for preferences
     implementation(libs.androidx.datastore.preferences)
