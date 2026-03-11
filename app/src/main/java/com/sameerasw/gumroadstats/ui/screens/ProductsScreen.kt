@@ -32,6 +32,9 @@ fun ProductsScreen(
     
     var showDetailsSheet by remember { mutableStateOf(false) }
 
+    val topPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 16.dp
+    val bottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 100.dp
+
     Box(modifier = modifier) {
         Column(modifier = Modifier.fillMaxSize()) {
             when (val state = uiState) {
@@ -46,7 +49,7 @@ fun ProductsScreen(
                             Text(text = state.message, color = MaterialTheme.colorScheme.error)
                             Spacer(modifier = Modifier.height(16.dp))
                             Button(onClick = { viewModel.loadProducts() }) {
-                                Text(stringResource(R.string.retry))
+                                 Text(stringResource(R.string.retry))
                             }
                         }
                     }
@@ -54,15 +57,15 @@ fun ProductsScreen(
                 is ProductsUiState.Success -> {
                     if (state.products.isEmpty()) {
                         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Text(stringResource(R.string.no_products_found))
+                             Text(stringResource(R.string.no_products_found))
                         }
                     } else {
                         LazyColumn(
                             state = listState,
                             modifier = Modifier.fillMaxSize(),
                             contentPadding = PaddingValues(
-                                top = WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 16.dp,
-                                bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 100.dp,
+                                top = topPadding,
+                                bottom = bottomPadding,
                                 start = 16.dp,
                                 end = 16.dp
                             ),

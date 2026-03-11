@@ -1,5 +1,6 @@
 package com.sameerasw.gumroadstats.ui.screens
 
+import PayoutsList
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -17,7 +18,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.sameerasw.gumroadstats.R
-import com.sameerasw.gumroadstats.ui.components.cards.PayoutsList
 import com.sameerasw.gumroadstats.ui.components.sheets.PayoutDetailsSheet
 import com.sameerasw.gumroadstats.viewmodel.PayoutDetailsState
 import com.sameerasw.gumroadstats.viewmodel.PayoutsUiState

@@ -15,6 +15,10 @@ import androidx.compose.ui.unit.dp
 import com.sameerasw.gumroadstats.R
 import com.sameerasw.gumroadstats.data.model.Payout
 import com.sameerasw.gumroadstats.data.model.User
+import com.sameerasw.gumroadstats.ui.components.cards.CompactPayoutCard
+import com.sameerasw.gumroadstats.ui.components.cards.PayablePayoutCard
+import com.sameerasw.gumroadstats.ui.components.cards.TotalCollectedCard
+import com.sameerasw.gumroadstats.ui.components.cards.UserInfoCard
 
 /**
  * List component that displays all payouts with payable payout highlighted at top
