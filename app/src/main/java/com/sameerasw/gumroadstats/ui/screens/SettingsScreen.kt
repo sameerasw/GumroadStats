@@ -43,8 +43,10 @@ import com.sameerasw.gumroadstats.utils.HapticUtil
 fun SettingsScreen(
     currentInterval: UpdateInterval,
     startDate: Long?,
+    groupByMonth: Boolean,
     onIntervalChange: (UpdateInterval) -> Unit,
     onStartDateChange: (Long) -> Unit,
+    onGroupByMonthChange: (Boolean) -> Unit,
     onClearStartDate: () -> Unit,
     onClearToken: () -> Unit,
     onNavigateBack: () -> Unit,
@@ -125,8 +127,42 @@ fun SettingsScreen(
                     modifier = Modifier.padding(bottom = 24.dp)
                 )
 
-                // Auto-Update Settings
+                // Auto-Update and Display Settings
                 RoundedCardContainer {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = MaterialTheme.shapes.extraSmall,
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHighest),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = stringResource(R.string.group_by_month),
+                                        style = MaterialTheme.typography.titleMedium,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                    Text(
+                                        text = stringResource(R.string.group_by_month_description),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                                Switch(
+                                    checked = groupByMonth,
+                                    onCheckedChange = { 
+                                        HapticUtil.performClick(haptic)
+                                        onGroupByMonthChange(it) 
+                                    }
+                                )
+                            }
+                        }
+                    }
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         shape = MaterialTheme.shapes.extraSmall,

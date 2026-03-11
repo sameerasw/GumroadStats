@@ -4,6 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -25,8 +26,12 @@ fun CompactPayoutCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     isFirst: Boolean = false,
-    isLast: Boolean = false
+    isLast: Boolean = false,
+    colors: CardColors? = null
 ) {
+    val cardColors = colors ?: CardDefaults.cardColors(
+        containerColor = MaterialTheme.colorScheme.surfaceContainer
+    )
     val shape = when {
         isFirst && isLast -> MaterialTheme.shapes.medium // All corners rounded if single item
         isFirst -> RoundedCornerShape(
@@ -49,7 +54,8 @@ fun CompactPayoutCard(
             .fillMaxWidth()
             .clickable(onClick = onClick),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-        shape = shape
+        shape = shape,
+        colors = cardColors
     ) {
         Row(
             modifier = Modifier

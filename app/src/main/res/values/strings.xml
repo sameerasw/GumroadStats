@@ -110,5 +110,9 @@
     <string name="no_payouts_found">No payouts found</string>
 
 
+    <!-- Settings -->
+    <string name="group_by_month">Group by month</string>
+    <string name="group_by_month_description">Group payouts by month and show summary</string>
+    <string name="monthly_summary">Monthly Summary</string>
 
 </resources>

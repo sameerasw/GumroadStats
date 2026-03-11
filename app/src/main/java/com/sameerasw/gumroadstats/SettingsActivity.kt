@@ -52,12 +52,15 @@ class SettingsActivity : ComponentActivity() {
 
                     val updateInterval by viewModel.updateInterval.collectAsState()
                     val startDate by viewModel.startDate.collectAsState()
+                    val groupByMonth by viewModel.groupByMonth.collectAsState()
 
                     SettingsScreen(
                         currentInterval = updateInterval,
                         startDate = startDate,
+                        groupByMonth = groupByMonth,
                         onIntervalChange = { viewModel.setUpdateInterval(it) },
                         onStartDateChange = { viewModel.setStartDate(it) },
+                        onGroupByMonthChange = { viewModel.setGroupByMonth(it) },
                         onClearStartDate = { viewModel.clearStartDate() },
                         onClearToken = { viewModel.clearAccessToken() },
                         onNavigateBack = { finish() }

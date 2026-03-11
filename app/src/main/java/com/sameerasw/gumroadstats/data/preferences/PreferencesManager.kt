@@ -3,6 +3,7 @@ package com.sameerasw.gumroadstats.data.preferences
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
@@ -17,6 +18,7 @@ class PreferencesManager(private val context: Context) {
         private val ACCESS_TOKEN_KEY = stringPreferencesKey("access_token")
         private val UPDATE_INTERVAL_KEY = longPreferencesKey("update_interval_minutes")
         private val START_DATE_KEY = longPreferencesKey("start_date_millis")
+        private val GROUP_BY_MONTH_KEY = booleanPreferencesKey("group_by_month")
     }
 
     val accessToken: Flow<String> = context.dataStore.data.map { preferences ->
@@ -32,6 +34,10 @@ class PreferencesManager(private val context: Context) {
         preferences[START_DATE_KEY]
     }
 
+    val groupByMonth: Flow<Boolean> = context.dataStore.data.map { preferences ->
+        preferences[GROUP_BY_MONTH_KEY] ?: false
+    }
+
     suspend fun saveAccessToken(token: String) {
         context.dataStore.edit { preferences ->
             preferences[ACCESS_TOKEN_KEY] = token
@@ -45,6 +51,12 @@ class PreferencesManager(private val context: Context) {
             } else {
                 preferences.remove(UPDATE_INTERVAL_KEY)
             }
+        }
+    }
+
+    suspend fun saveGroupByMonth(enabled: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[GROUP_BY_MONTH_KEY] = enabled
         }
     }
 

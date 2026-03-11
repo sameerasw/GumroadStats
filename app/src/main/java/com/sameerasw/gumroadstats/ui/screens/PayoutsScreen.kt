@@ -1,11 +1,8 @@
 package com.sameerasw.gumroadstats.ui.screens
 
-import PayoutsList
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -18,6 +15,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.sameerasw.gumroadstats.R
+import com.sameerasw.gumroadstats.ui.components.cards.PayoutsList
 import com.sameerasw.gumroadstats.ui.components.sheets.PayoutDetailsSheet
 import com.sameerasw.gumroadstats.viewmodel.PayoutDetailsState
 import com.sameerasw.gumroadstats.viewmodel.PayoutsUiState
@@ -39,6 +37,7 @@ fun PayoutsScreen(
     val accessToken by viewModel.accessToken.collectAsState()
     val payoutDetailsState by viewModel.payoutDetailsState.collectAsState()
     val userState by viewModel.userState.collectAsState()
+    val groupByMonth by viewModel.groupByMonth.collectAsState()
     var tokenInput by remember { mutableStateOf("") }
     val keyboardController = LocalSoftwareKeyboardController.current
     val sheetState = rememberModalBottomSheetState()
@@ -111,6 +110,7 @@ fun PayoutsScreen(
                             PayoutsList(
                                 payouts = state.payouts,
                                 user = (userState as? UserState.Success)?.user,
+                                groupByMonth = groupByMonth,
                                 onPayoutClick = { payout ->
                                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                     payout.id?.let { viewModel.loadPayoutDetails(it) }
