@@ -12,6 +12,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -30,12 +31,13 @@ import com.sameerasw.gumroadstats.R
 import com.sameerasw.gumroadstats.data.preferences.UpdateInterval
 import com.sameerasw.gumroadstats.ui.components.RoundedCardContainer
 
-import com.sameerasw.gumroadstats.ui.components.AboutSection
 import com.sameerasw.gumroadstats.ui.components.AirSyncFloatingToolbar
+import com.sameerasw.gumroadstats.ui.components.sheets.AboutBottomSheet
 import androidx.compose.material3.FloatingToolbarDefaults
 import androidx.compose.material3.FloatingToolbarExitDirection
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.zIndex
+import com.sameerasw.gumroadstats.ui.modifiers.progressiveBlur
 import com.sameerasw.gumroadstats.utils.HapticUtil
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -55,6 +57,7 @@ fun SettingsScreen(
     var showClearDialog by remember { mutableStateOf(false) }
     var showIntervalMenu by remember { mutableStateOf(false) }
     var showDatePicker by remember { mutableStateOf(false) }
+    var showAboutSheet by remember { mutableStateOf(false) }
     
     val haptic = LocalHapticFeedback.current
     val context = LocalContext.current
@@ -94,32 +97,53 @@ fun SettingsScreen(
         }
     }
 
+    if (showAboutSheet) {
+        AboutBottomSheet(
+            onDismissRequest = { showAboutSheet = false },
+            onToggleDeveloperMode = {
+                // Developer mode toggling logic
+                Toast.makeText(context, "Developer options coming soon!", Toast.LENGTH_SHORT).show()
+            }
+        )
+    }
+
     Scaffold(
         topBar = { },
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         modifier = modifier
     ) { padding ->
-        Box(modifier = Modifier.fillMaxSize()) {
+        val density = androidx.compose.ui.platform.LocalDensity.current
+        val statusBarHeightPx = with(density) {
+            WindowInsets.statusBars.asPaddingValues().calculateTopPadding().toPx()
+        }
+        val bottomBlurHeightPx = with(density) { 150.dp.toPx() }
+
+        val scrollBehavior = FloatingToolbarDefaults.exitAlwaysScrollBehavior(
+            exitDirection = FloatingToolbarExitDirection.Bottom
+        )
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .progressiveBlur(
+                    blurRadius = 40f,
+                    height = statusBarHeightPx * 1.2f,
+                    direction = com.sameerasw.gumroadstats.ui.modifiers.BlurDirection.TOP
+                )
+        ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
+                    .progressiveBlur(
+                        blurRadius = 40f,
+                        height = bottomBlurHeightPx,
+                        direction = com.sameerasw.gumroadstats.ui.modifiers.BlurDirection.BOTTOM
+                    )
                     .verticalScroll(scrollState)
                     .padding(horizontal = 16.dp)
             ) {
                 Spacer(modifier = Modifier.windowInsetsPadding(WindowInsets.statusBars))
-                
-                IconButton(
-                    onClick = {
-                        HapticUtil.performClick(haptic)
-                        onNavigateBack()
-                    },
-                    modifier = Modifier.padding(bottom = 8.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = stringResource(R.string.back)
-                    )
-                }
+                Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
                     text = stringResource(R.string.settings_title),
@@ -316,18 +340,38 @@ fun SettingsScreen(
 
                 Spacer(modifier = Modifier.height(32.dp))
 
-                AboutSection(
-                    appName = stringResource(R.string.app_name),
-                    description = stringResource(R.string.app_description),
-                    onAvatarLongClick = {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        Toast.makeText(context, "Developer options coming soon!", Toast.LENGTH_SHORT).show()
-                    }
-                )
-
                 Spacer(modifier = Modifier.windowInsetsPadding(WindowInsets.navigationBars))
-                Spacer(modifier = Modifier.height(32.dp))
+                Spacer(modifier = Modifier.height(150.dp))
             }
+
+            AirSyncFloatingToolbar(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .zIndex(1f),
+                onBackClick = {
+                    HapticUtil.performClick(haptic)
+                    onNavigateBack()
+                },
+                title = stringResource(R.string.settings_title),
+                scrollBehavior = scrollBehavior,
+                floatingActionButton = {
+                    FloatingActionButton(
+                        onClick = {
+                            HapticUtil.performClick(haptic)
+                            showAboutSheet = true
+                        },
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                        shape = MaterialTheme.shapes.large,
+                        elevation = FloatingActionButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Info,
+                            contentDescription = "About"
+                        )
+                    }
+                }
+            )
         }
     }
 

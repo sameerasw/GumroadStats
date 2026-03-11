@@ -2,9 +2,11 @@ package com.sameerasw.gumroadstats.ui.screens
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
@@ -51,6 +53,7 @@ import kotlinx.coroutines.launch
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import com.sameerasw.gumroadstats.ui.modifiers.progressiveBlur
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -86,13 +89,30 @@ fun MainScreen(
         containerColor = Color.Transparent,
         topBar = { }
     ) { innerPadding ->
+        val density = androidx.compose.ui.platform.LocalDensity.current
+        val statusBarHeightPx = with(density) {
+            WindowInsets.statusBars.asPaddingValues().calculateTopPadding().toPx()
+        }
+        val bottomBlurHeightPx = with(density) { 130.dp.toPx() }
+
         Box(
             modifier = Modifier
                 .fillMaxSize()
+                .progressiveBlur(
+                    blurRadius = 40f,
+                    height = statusBarHeightPx * 1.2f, // Slightly more than status bar
+                    direction = com.sameerasw.gumroadstats.ui.modifiers.BlurDirection.TOP
+                )
         ) {
             HorizontalPager(
                 state = pagerState,
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .progressiveBlur(
+                        blurRadius = 40f,
+                        height = bottomBlurHeightPx,
+                        direction = com.sameerasw.gumroadstats.ui.modifiers.BlurDirection.BOTTOM
+                    ),
                 userScrollEnabled = true
             ) { page ->
                 when (page) {

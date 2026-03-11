@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingToolbarDefaults
@@ -19,6 +20,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -37,9 +39,11 @@ import kotlinx.coroutines.delay
 @Composable
 fun AirSyncFloatingToolbar(
     modifier: Modifier = Modifier,
-    currentPage: Int,
-    tabs: List<AirSyncTab>,
-    onTabSelected: (Int) -> Unit,
+    currentPage: Int = 0,
+    tabs: List<AirSyncTab> = emptyList(),
+    onTabSelected: (Int) -> Unit = {},
+    title: String? = null,
+    onBackClick: (() -> Unit)? = null,
     scrollBehavior: FloatingToolbarScrollBehavior,
     floatingActionButton: (@Composable () -> Unit)? = null
 ) {
@@ -55,37 +59,66 @@ fun AirSyncFloatingToolbar(
             toolbarContainerColor = MaterialTheme.colorScheme.primary,
         ),
         content = {
-            tabs.forEachIndexed { index, tab ->
-                val isSelected = currentPage == index
-
+            if (onBackClick != null) {
                 IconButton(
                     onClick = {
-                        onTabSelected(index)
+                        onBackClick()
                     },
-                    modifier = Modifier
-                        .size(48.dp),
-                    colors = if (isSelected) {
-                        IconButtonDefaults.filledIconButtonColors(
-                            contentColor = MaterialTheme.colorScheme.primary,
-                            containerColor = MaterialTheme.colorScheme.background
-                        )
-                    } else {
-                        IconButtonDefaults.iconButtonColors(
-                            contentColor = MaterialTheme.colorScheme.background,
-                            containerColor = MaterialTheme.colorScheme.primary
-                        )
-                    }
+                    modifier = Modifier.size(48.dp),
+                    colors = IconButtonDefaults.filledIconButtonColors(
+                        contentColor = MaterialTheme.colorScheme.primary,
+                        containerColor = MaterialTheme.colorScheme.background
+                    )
                 ) {
                     Icon(
-                        imageVector = tab.icon,
-                        contentDescription = tab.title,
+                        imageVector = androidx.compose.material.icons.Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = null,
                         modifier = Modifier.size(24.dp)
                     )
                 }
 
-                // Spacing between buttons
-                if (index < tabs.size - 1) {
-                    Spacer(modifier = Modifier.width(8.dp))
+                if (title != null) {
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.background,
+                        modifier = Modifier.padding(end = 16.dp)
+                    )
+                }
+            } else {
+                tabs.forEachIndexed { index, tab ->
+                    val isSelected = currentPage == index
+
+                    IconButton(
+                        onClick = {
+                            onTabSelected(index)
+                        },
+                        modifier = Modifier
+                            .size(48.dp),
+                        colors = if (isSelected) {
+                            IconButtonDefaults.filledIconButtonColors(
+                                contentColor = MaterialTheme.colorScheme.primary,
+                                containerColor = MaterialTheme.colorScheme.background
+                            )
+                        } else {
+                            IconButtonDefaults.iconButtonColors(
+                                contentColor = MaterialTheme.colorScheme.background,
+                                containerColor = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    ) {
+                        Icon(
+                            imageVector = tab.icon,
+                            contentDescription = tab.title,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+
+                    // Spacing between buttons
+                    if (index < tabs.size - 1) {
+                        Spacer(modifier = Modifier.width(8.dp))
+                    }
                 }
             }
         }

@@ -69,7 +69,7 @@ fun SalesScreen(
     }
 
     val topPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 16.dp
-    val bottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 100.dp
+    val bottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 150.dp
 
     Box(modifier = modifier) {
         Column(

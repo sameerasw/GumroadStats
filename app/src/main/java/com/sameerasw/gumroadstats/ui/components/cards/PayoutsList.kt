@@ -84,7 +84,7 @@ fun PayoutsList(
         }
 
         val topPadding = WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 16.dp
-        val bottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 100.dp
+        val bottomPadding = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 150.dp
 
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
