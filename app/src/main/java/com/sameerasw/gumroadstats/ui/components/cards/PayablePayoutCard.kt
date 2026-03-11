@@ -34,7 +34,7 @@ fun PayablePayoutCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(160.dp),
+            .height(200.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer
         ),
