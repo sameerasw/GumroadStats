@@ -225,7 +225,7 @@ fun SettingsScreen(
                                                 showIntervalMenu = false
                                             },
                                             leadingIcon = if (interval == currentInterval) {
-                                                { Icon(Icons.Default.Check, contentDescription = null) }
+                                                { Icon(painter = painterResource(id = R.drawable.rounded_check_24), contentDescription = null) }
                                             } else null
                                         )
                                     }
@@ -366,7 +366,7 @@ fun SettingsScreen(
                         elevation = FloatingActionButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp)
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Info,
+                            painter = painterResource(id = R.drawable.rounded_info_24),
                             contentDescription = "About"
                         )
                     }

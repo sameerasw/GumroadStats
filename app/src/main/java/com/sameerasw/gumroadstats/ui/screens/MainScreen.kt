@@ -53,6 +53,7 @@ import kotlinx.coroutines.launch
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.res.painterResource
 import com.sameerasw.gumroadstats.ui.modifiers.progressiveBlur
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -77,9 +78,9 @@ fun MainScreen(
 
     val tabs = remember(tabPayouts, tabSales, tabInventory) {
         listOf(
-            AirSyncTab(tabPayouts, Icons.Default.AttachMoney, 0),
-            AirSyncTab(tabSales, Icons.Default.ShoppingCart, 1),
-            AirSyncTab(tabInventory, Icons.Default.Inventory, 2)
+            AirSyncTab(tabPayouts, R.drawable.rounded_payments_24, 0),
+            AirSyncTab(tabSales, R.drawable.rounded_shopping_cart_24, 1),
+            AirSyncTab(tabInventory, R.drawable.rounded_inventory_2_24, 2)
         )
     }
 
@@ -158,7 +159,7 @@ fun MainScreen(
                         elevation = FloatingActionButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp)
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Settings,
+                            painter = painterResource(id = R.drawable.rounded_settings_24),
                             contentDescription = stringResource(R.string.settings)
                         )
                     }

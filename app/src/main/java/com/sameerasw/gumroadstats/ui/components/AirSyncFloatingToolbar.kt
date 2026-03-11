@@ -31,7 +31,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import com.sameerasw.gumroadstats.R
 import com.sameerasw.gumroadstats.ui.model.AirSyncTab
 import kotlinx.coroutines.delay
 
@@ -71,7 +73,7 @@ fun AirSyncFloatingToolbar(
                     )
                 ) {
                     Icon(
-                        imageVector = androidx.compose.material.icons.Icons.AutoMirrored.Filled.ArrowBack,
+                        painter = painterResource(id = R.drawable.rounded_arrow_back_24),
                         contentDescription = null,
                         modifier = Modifier.size(24.dp)
                     )
@@ -109,7 +111,7 @@ fun AirSyncFloatingToolbar(
                         }
                     ) {
                         Icon(
-                            imageVector = tab.icon,
+                            painter = painterResource(id = tab.icon),
                             contentDescription = tab.title,
                             modifier = Modifier.size(24.dp)
                         )
