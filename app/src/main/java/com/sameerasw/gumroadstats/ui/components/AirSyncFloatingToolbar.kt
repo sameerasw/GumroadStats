@@ -1,6 +1,10 @@
 package com.sameerasw.gumroadstats.ui.components
 
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -10,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -92,12 +97,40 @@ fun AirSyncFloatingToolbar(
                 tabs.forEachIndexed { index, tab ->
                     val isSelected = currentPage == index
 
+                    val itemWidth by animateDpAsState(
+                        targetValue = 48.dp,
+                        animationSpec = spring(
+                            dampingRatio = Spring.DampingRatioMediumBouncy,
+                            stiffness = Spring.StiffnessLow
+                        ),
+                        label = "item_width_$index"
+                    )
+
+                    val labelWidth by animateDpAsState(
+                        targetValue = if (isSelected) 80.dp else 0.dp,
+                        animationSpec = spring(
+                            dampingRatio = Spring.DampingRatioMediumBouncy,
+                            stiffness = Spring.StiffnessLow
+                        ),
+                        label = "label_width_$index"
+                    )
+
+                    val spacerWidth by animateDpAsState(
+                        targetValue = if (index < tabs.size - 1) 8.dp else 0.dp,
+                        animationSpec = spring(
+                            dampingRatio = Spring.DampingRatioMediumBouncy,
+                            stiffness = Spring.StiffnessLow
+                        ),
+                        label = "spacer_width_$index"
+                    )
+
                     IconButton(
                         onClick = {
                             onTabSelected(index)
                         },
                         modifier = Modifier
-                            .size(48.dp),
+                            .width(itemWidth + labelWidth)
+                            .height(48.dp),
                         colors = if (isSelected) {
                             IconButtonDefaults.filledIconButtonColors(
                                 contentColor = MaterialTheme.colorScheme.primary,
@@ -110,16 +143,31 @@ fun AirSyncFloatingToolbar(
                             )
                         }
                     ) {
-                        Icon(
-                            painter = painterResource(id = tab.icon),
-                            contentDescription = tab.title,
-                            modifier = Modifier.size(24.dp)
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center,
+                            modifier = Modifier.padding(horizontal = 8.dp)
+                        ) {
+                            Icon(
+                                painter = painterResource(id = tab.icon),
+                                contentDescription = tab.title,
+                                modifier = Modifier.size(24.dp)
+                            )
+                            if (isSelected) {
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = tab.title,
+                                    style = MaterialTheme.typography.labelLarge,
+                                    maxLines = 1,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                        }
                     }
 
                     // Spacing between buttons
                     if (index < tabs.size - 1) {
-                        Spacer(modifier = Modifier.width(8.dp))
+                        Spacer(modifier = Modifier.width(spacerWidth))
                     }
                 }
             }
